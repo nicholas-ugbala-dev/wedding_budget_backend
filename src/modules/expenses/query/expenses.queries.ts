@@ -49,26 +49,28 @@ const findById = `
         COALESCE(
             json_agg(
                 json_build_object(
-                    'id',              p.id,
-                    'expense_id',      p.expense_id,
-                    'payment_type',    p.payment_type,
-                    'wallet_amount',   p.wallet_amount,
-                    'wallet_currency', p.wallet_currency,
-                    'exchange_rate',   p.exchange_rate,
-                    'base_amount',     p.base_amount,
-                    'payment_date',    p.payment_date,
-                    'notes',           p.notes,
-                    'created_at',      p.created_at,
-                    'updated_at',      p.updated_at
+                    'id',                  p.id,
+                    'expense_id',          p.expense_id,
+                    'payment_type',        p.payment_type,
+                    'user_currency_id',    p.user_currency_id,
+                    'wallet_currency_code', uc.currency_code,
+                    'wallet_amount',       p.wallet_amount,
+                    'exchange_rate',       p.exchange_rate,
+                    'base_amount',         p.base_amount,
+                    'payment_date',        p.payment_date,
+                    'notes',               p.notes,
+                    'created_at',          p.created_at,
+                    'updated_at',          p.updated_at
                 ) ORDER BY p.payment_date DESC
             ) FILTER (WHERE p.id IS NOT NULL AND p.deleted_at IS NULL),
             '[]'
         )                                                                            AS payments
     FROM expenses e
-    LEFT JOIN ceremonies  cer ON cer.id = e.ceremony_id
-    LEFT JOIN categories  c   ON c.id   = e.category_id
-    LEFT JOIN vendors     v   ON v.id   = e.vendor_id
-    LEFT JOIN payments    p   ON p.expense_id = e.id
+    LEFT JOIN ceremonies     cer ON cer.id = e.ceremony_id
+    LEFT JOIN categories     c   ON c.id   = e.category_id
+    LEFT JOIN vendors        v   ON v.id   = e.vendor_id
+    LEFT JOIN payments       p   ON p.expense_id = e.id
+    LEFT JOIN user_currencies uc ON uc.id = p.user_currency_id
     WHERE e.id = $1 AND e.user_id = $2
     GROUP BY e.id, cer.name, c.name, v.name
 `;

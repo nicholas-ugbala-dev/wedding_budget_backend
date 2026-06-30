@@ -82,3 +82,87 @@ example {
     }
   }
 }
+
+example {
+  name: example (1)
+  
+  request: {
+    url: {{BASE_URL}}/expenses/{{EXPENSE_ID}}
+    method: GET
+    mode: none
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 1330
+      etag: W/"532-oNKUis4gCvaDgBQgFgt9CkJhUgU"
+      date: Tue, 30 Jun 2026 12:51:08 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Expense fetched successfully",
+          "url": "/api/v1/expenses/c0913dfe-bdac-4389-9f42-0c57f6523c71",
+          "data": {
+            "id": "c0913dfe-bdac-4389-9f42-0c57f6523c71",
+            "user_id": "8c867665-9464-4748-ada1-cf32dd070703",
+            "name": "Floral Arrangements",
+            "ceremony_id": "624f971d-2b31-4030-8549-14debc5a6039",
+            "ceremony_name": "Engagement Party",
+            "category_id": "8f190d6b-3eb5-41cc-b29d-7f3528beb026",
+            "category_name": "Decoration",
+            "vendor_id": "4931f654-7f63-4125-b1b9-955b7ae66a42",
+            "vendor_name": "Bloom Floral Studio",
+            "planned_amount": "50000000",
+            "actual_amount": "45000000",
+            "base_currency": "NGN",
+            "refundable_amount": "5000000",
+            "is_refunded": false,
+            "refunded_at": null,
+            "notes": "Includes table centerpieces and bridal bouquet",
+            "is_planned": false,
+            "created_at": "2026-06-30T11:40:57.530Z",
+            "updated_at": "2026-06-30T11:40:57.530Z",
+            "total_paid": "10000000",
+            "balance": "35000000",
+            "status": "partial",
+            "payments": [
+              {
+                "id": "44d692dd-e1bf-4501-bc2b-39415ae8df50",
+                "expense_id": "c0913dfe-bdac-4389-9f42-0c57f6523c71",
+                "payment_type": "deposit",
+                "user_currency_id": "d061f353-8cab-4d9d-aa8f-415b7a83ba72",
+                "wallet_currency_code": "NGN",
+                "wallet_amount": 10000000,
+                "exchange_rate": null,
+                "base_amount": 10000000,
+                "payment_date": "2026-06-30T11:00:00+01:00",
+                "notes": "Initial deposit",
+                "created_at": "2026-06-30T13:47:20.535931+01:00",
+                "updated_at": "2026-06-30T13:47:20.535931+01:00"
+              }
+            ]
+          }
+        }
+      '''
+    }
+  }
+}

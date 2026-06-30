@@ -3,11 +3,15 @@ import { ICurrenciesRepository, UserCurrency } from '../interface/currencies.int
 import { AddCurrencyValidator } from '../validation/currencies.validations';
 import CurrenciesQueries from '../query/currencies.queries';
 
-const { findAll, findByCode, add, remove } = CurrenciesQueries;
+const { findAll, findById, findByCode, add, remove } = CurrenciesQueries;
 
 export class CurrenciesRepository implements ICurrenciesRepository {
     async findAll(userId: string): Promise<UserCurrency[]> {
         return (await dbQuery.manyOrNone<UserCurrency>(findAll, [userId])) ?? [];
+    }
+
+    async findById(userId: string, id: string): Promise<UserCurrency | null> {
+        return dbQuery.oneOrNone<UserCurrency>(findById, [userId, id]);
     }
 
     async findByCode(userId: string, currencyCode: string): Promise<UserCurrency | null> {

@@ -9,6 +9,7 @@ export interface UserCurrency {
 
 export interface ICurrenciesRepository {
     findAll(userId: string): Promise<UserCurrency[]>;
+    findById(userId: string, id: string): Promise<UserCurrency | null>;
     findByCode(userId: string, currencyCode: string): Promise<UserCurrency | null>;
     add(userId: string, data: AddCurrencyValidator): Promise<UserCurrency>;
     remove(userId: string, currencyCode: string): Promise<void>;

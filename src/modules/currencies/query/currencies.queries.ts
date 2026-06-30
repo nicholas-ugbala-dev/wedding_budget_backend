@@ -22,6 +22,12 @@ const remove = `
     WHERE user_id = $1 AND currency_code = $2
 `;
 
-const CurrenciesQueries = { findAll, findByCode, add, remove };
+const findById = `
+    SELECT id, user_id, currency_code, created_at
+    FROM user_currencies
+    WHERE user_id = $1 AND id = $2
+`;
+
+const CurrenciesQueries = { findAll, findById, findByCode, add, remove };
 
 export default CurrenciesQueries;

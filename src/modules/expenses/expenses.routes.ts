@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { expensesController } from './expenses.controller';
+import { paymentsController } from '../payments/payments.controller';
 import { ValidationMiddleware } from '../../middleware/validation.middleware';
 import { tokenGuard } from '../../middleware/auth.middleware';
 import { tryCatch } from '../../utils/error';
@@ -8,6 +9,7 @@ import {
     updateExpenseValidator,
     listExpensesValidator,
 } from './validation/expenses.validations';
+import { createPaymentValidator } from '../payments/validation/payments.validations';
 
 const { validateRequest } = ValidationMiddleware;
 const router = Router();
@@ -35,5 +37,13 @@ router.patch(
 );
 
 router.delete('/:id', tryCatch(expensesController.delete));
+
+router.post(
+    '/:id/payments',
+    validateRequest(createPaymentValidator),
+    tryCatch(paymentsController.create),
+);
+
+router.delete('/:id/payments/:paymentId', tryCatch(paymentsController.delete));
 
 export const expensesRouter = router;
