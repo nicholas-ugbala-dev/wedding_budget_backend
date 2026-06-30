@@ -1,0 +1,79 @@
+meta {
+  name: Update Category
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{BASE_URL}}/categories/{{CATEGORY_ID}}
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+body:json {
+  {
+    "name": "Venue Decoration"
+  }
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/categories/{{CATEGORY_ID}}
+    method: PATCH
+    mode: json
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  
+    body:json: {
+      {
+        "name": "Venue Decoration"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 355
+      etag: W/"163-AOE4JgDAx+Jli9dNfYp2YNyNjyE"
+      date: Tue, 30 Jun 2026 03:17:50 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Category updated successfully",
+          "url": "/api/v1/categories/960b7709-b555-4684-82f1-4ac747f1e974",
+          "data": {
+            "id": "960b7709-b555-4684-82f1-4ac747f1e974",
+            "user_id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+            "name": "Venue Decoration",
+            "ceremony": "Traditional",
+            "created_at": "2026-06-30T03:17:04.898Z",
+            "updated_at": "2026-06-30T03:17:50.862Z"
+          }
+        }
+      '''
+    }
+  }
+}

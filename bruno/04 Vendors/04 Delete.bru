@@ -1,0 +1,60 @@
+meta {
+  name: Delete Vendor
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{BASE_URL}}/vendors/{{VENDOR_ID}}
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/vendors/{{VENDOR_ID}}
+    method: DELETE
+    mode: none
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 129
+      etag: W/"81-WI7X1lJJM1/wpIfon289uNKZKzw"
+      date: Tue, 30 Jun 2026 03:16:42 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Vendor deleted successfully",
+          "url": "/api/v1/vendors/bb9da6e4-79c3-4593-a541-1f5cdd19a057",
+          "data": null
+        }
+      '''
+    }
+  }
+}

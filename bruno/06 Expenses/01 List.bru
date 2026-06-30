@@ -1,0 +1,150 @@
+meta {
+  name: List Expenses
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{BASE_URL}}/expenses?page=1&limit=7
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  limit: 7
+  ~ceremony_id: {{CEREMONY_ID}}
+  ~status: unpaid
+  ~search: flowers
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/expenses?page=1&limit=7
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+      limit: 7
+      ~ceremony_id: {{CEREMONY_ID}}
+      ~status: unpaid
+      ~search: flowers
+    }
+  
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 2046
+      etag: W/"7fe-DfnYOOrL9v8ePabmtif3TanC3F4"
+      date: Tue, 30 Jun 2026 03:53:49 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Expenses fetched successfully",
+          "url": "/api/v1/expenses?page=1&limit=7",
+          "data": {
+            "items": [
+              {
+                "id": "a3176a24-5f08-4342-94ef-6e55e3521482",
+                "user_id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+                "name": "Wedding Cake",
+                "ceremony": "White Wedding",
+                "category_id": "a41be944-379a-48d9-b216-9224a314e455",
+                "category_name": "Catering",
+                "vendor_id": null,
+                "vendor_name": null,
+                "planned_amount": null,
+                "actual_amount": "27000000",
+                "base_currency": "NGN",
+                "notes": "Five-tier custom cake with dessert table setup",
+                "is_planned": false,
+                "created_at": "2026-06-30T03:51:11.861Z",
+                "updated_at": "2026-06-30T03:51:11.861Z",
+                "total_paid": "0",
+                "balance": "27000000",
+                "status": "unpaid",
+                "total_count": "3"
+              },
+              {
+                "id": "25aca016-6b86-498c-b6bd-b14db2258a27",
+                "user_id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+                "name": "Live Band Performance",
+                "ceremony": "Engagement Ceremony",
+                "category_id": "44648c4c-85bf-4be7-9ed6-f4a34b675e24",
+                "category_name": "Entertainment",
+                "vendor_id": "6814e420-a277-4ed0-8453-9a2597f08788",
+                "vendor_name": "Harmony Events Band",
+                "planned_amount": "60000000",
+                "actual_amount": "55000000",
+                "base_currency": "NGN",
+                "notes": "Live band performance for reception and cocktail hour",
+                "is_planned": false,
+                "created_at": "2026-06-30T03:50:20.771Z",
+                "updated_at": "2026-06-30T03:50:20.771Z",
+                "total_paid": "0",
+                "balance": "55000000",
+                "status": "unpaid",
+                "total_count": "3"
+              },
+              {
+                "id": "c92e6ba8-01f4-4e72-96e2-8620a1114f6c",
+                "user_id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+                "name": "Floral Arrangements",
+                "ceremony": "Traditional",
+                "category_id": "41e28e00-578a-4dcb-8068-a804c6c48165",
+                "category_name": "Decoration",
+                "vendor_id": "c85724e8-8397-42e3-87ab-3eef0066317b",
+                "vendor_name": "Bloom Floral Studio",
+                "planned_amount": "50000000",
+                "actual_amount": "45000000",
+                "base_currency": "NGN",
+                "notes": "Includes table centerpieces and bridal bouquet",
+                "is_planned": false,
+                "created_at": "2026-06-30T03:46:12.705Z",
+                "updated_at": "2026-06-30T03:46:12.705Z",
+                "total_paid": "0",
+                "balance": "45000000",
+                "status": "unpaid",
+                "total_count": "3"
+              }
+            ],
+            "pagination": {
+              "page": "1",
+              "limit": "7",
+              "total": 3,
+              "total_pages": 1,
+              "has_next": false,
+              "has_prev": false
+            }
+          }
+        }
+      '''
+    }
+  }
+}

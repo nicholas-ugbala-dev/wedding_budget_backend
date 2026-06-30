@@ -1,0 +1,60 @@
+meta {
+  name: Delete Ceremony
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{BASE_URL}}/ceremonies/{{CEREMONY_ID}}
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/ceremonies/{{CEREMONY_ID}}
+    method: DELETE
+    mode: none
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 134
+      etag: W/"86-wpHjRHdIi3IksWGkPrlxif60MEY"
+      date: Tue, 30 Jun 2026 03:12:44 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Ceremony removed successfully",
+          "url": "/api/v1/ceremonies/044e34c2-9feb-4ca1-b08d-c73fdb6cbce2",
+          "data": null
+        }
+      '''
+    }
+  }
+}

@@ -1,0 +1,95 @@
+meta {
+  name: Mark Refunded
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{BASE_URL}}/expenses/{{EXPENSE_ID}}
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+body:json {
+  {
+    "is_refunded": true
+  }
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/expenses/{{EXPENSE_ID}}
+    method: PATCH
+    mode: json
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  
+    body:json: {
+      {
+        "is_refunded": true
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 886
+      etag: W/"376-Y9b5UZ1D2+VYwU+98e+VYeKhbhs"
+      date: Tue, 30 Jun 2026 11:15:20 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Expense updated successfully",
+          "url": "/api/v1/expenses/f95b56a8-1d87-403d-810d-0ce15d6a9957",
+          "data": {
+            "id": "f95b56a8-1d87-403d-810d-0ce15d6a9957",
+            "user_id": "8c867665-9464-4748-ada1-cf32dd070703",
+            "name": "Floral Arrangements",
+            "ceremony_id": "624f971d-2b31-4030-8549-14debc5a6039",
+            "ceremony_name": "Engagement Party",
+            "category_id": "8f190d6b-3eb5-41cc-b29d-7f3528beb026",
+            "category_name": "Decoration",
+            "vendor_id": "4931f654-7f63-4125-b1b9-955b7ae66a42",
+            "vendor_name": "Bloom Floral Studio",
+            "planned_amount": "50000000",
+            "actual_amount": "45000000",
+            "base_currency": "NGN",
+            "refundable_amount": "5000000",
+            "is_refunded": true,
+            "refunded_at": "2026-06-30T11:15:20.803Z",
+            "notes": "Includes table centerpieces and bridal bouquet",
+            "is_planned": false,
+            "created_at": "2026-06-30T11:13:26.622Z",
+            "updated_at": "2026-06-30T11:15:20.805Z",
+            "total_paid": "0",
+            "balance": "45000000",
+            "status": "unpaid"
+          }
+        }
+      '''
+    }
+  }
+}

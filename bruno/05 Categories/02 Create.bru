@@ -1,0 +1,88 @@
+meta {
+  name: Create Category
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{BASE_URL}}/categories
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+body:json {
+  {
+    "name": "Decoration",
+    "ceremony_id": "{{CEREMONY_ID}}"
+  }
+}
+
+script:post-response {
+  if (res.status === 201) {
+    bru.setVar("CATEGORY_ID", res.body.data.id);
+  }
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/categories
+    method: POST
+    mode: json
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  
+    body:json: {
+      {
+        "name": "Decoration",
+        "ceremony_id": "{{CEREMONY_ID}}"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 312
+      etag: W/"138-oG7QKR/hDWfNnIY4fZFW/j6EU2k"
+      date: Tue, 30 Jun 2026 03:17:04 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Category created successfully",
+          "url": "/api/v1/categories",
+          "data": {
+            "id": "960b7709-b555-4684-82f1-4ac747f1e974",
+            "user_id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+            "name": "Decoration",
+            "ceremony_id": "960b7709-b555-4684-82f1-4ac747f1e974",
+            "ceremony_name": "Traditional",
+            "created_at": "2026-06-30T03:17:04.898Z",
+            "updated_at": "2026-06-30T03:17:04.898Z"
+          }
+        }
+      '''
+    }
+  }
+}

@@ -1,0 +1,60 @@
+meta {
+  name: Remove Currency
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{BASE_URL}}/currencies/EUR
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/currencies/EUR
+    method: DELETE
+    mode: none
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 101
+      etag: W/"65-xIF2jNLAJkQGaT7izQWSymqJEZ4"
+      date: Tue, 30 Jun 2026 03:14:18 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Currency removed successfully",
+          "url": "/api/v1/currencies/EUR",
+          "data": null
+        }
+      '''
+    }
+  }
+}

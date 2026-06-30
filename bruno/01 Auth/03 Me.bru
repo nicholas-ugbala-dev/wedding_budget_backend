@@ -1,0 +1,71 @@
+meta {
+  name: Me
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{BASE_URL}}/auth/me
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/auth/me
+    method: GET
+    mode: none
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 351
+      etag: W/"15f-K0ZO1eoMvXWsPUe2jY3JA+u1+js"
+      date: Tue, 30 Jun 2026 03:09:01 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "User fetched successfully",
+          "url": "/api/v1/auth/me",
+          "data": {
+            "id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+            "first_name": "Munachi",
+            "last_name": "Iwotor",
+            "email": "munachi@wedding.com",
+            "account_type": "couple",
+            "base_currency": "NGN",
+            "event_name": null,
+            "event_date": null,
+            "wedding_location": null,
+            "created_at": "2026-06-30T03:05:24.888Z"
+          }
+        }
+      '''
+    }
+  }
+}

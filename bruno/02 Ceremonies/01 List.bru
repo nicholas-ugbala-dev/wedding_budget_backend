@@ -1,0 +1,79 @@
+meta {
+  name: List Ceremonies
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{BASE_URL}}/ceremonies
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/ceremonies
+    method: GET
+    mode: none
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 564
+      etag: W/"234-WbJYeGrxZhNpH++bEkU81rPpU00"
+      date: Tue, 30 Jun 2026 03:11:08 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Ceremonies fetched successfully",
+          "url": "/api/v1/ceremonies",
+          "data": [
+            {
+              "id": "9f665761-b3f1-4b95-ac12-52b4a8701da5",
+              "user_id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+              "name": "Traditional",
+              "created_at": "2026-06-30T03:10:09.014Z"
+            },
+            {
+              "id": "139128b6-28a4-47e6-ae6a-cb442ce3abe0",
+              "user_id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+              "name": "White Wedding",
+              "created_at": "2026-06-30T03:10:09.014Z"
+            },
+            {
+              "id": "c24613ad-1f8d-4705-b217-08af647b9413",
+              "user_id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+              "name": "Reception",
+              "created_at": "2026-06-30T03:10:09.014Z"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

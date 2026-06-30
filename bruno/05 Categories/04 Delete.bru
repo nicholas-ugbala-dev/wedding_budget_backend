@@ -1,0 +1,60 @@
+meta {
+  name: Delete Category
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{BASE_URL}}/categories/{{CATEGORY_ID}}
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/categories/{{CATEGORY_ID}}
+    method: DELETE
+    mode: none
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 134
+      etag: W/"86-+3Z9fAi4oqUduO/5gTwA/ch5tsQ"
+      date: Tue, 30 Jun 2026 03:24:07 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Category deleted successfully",
+          "url": "/api/v1/categories/38fa05a8-53e9-4700-b56d-88e0ec529455",
+          "data": null
+        }
+      '''
+    }
+  }
+}

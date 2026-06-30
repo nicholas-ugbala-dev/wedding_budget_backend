@@ -1,0 +1,85 @@
+meta {
+  name: List Categories
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{BASE_URL}}/categories
+  body: none
+  auth: none
+}
+
+params:query {
+  ~ceremony_id: {{CEREMONY_ID}}
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/categories
+    method: GET
+    mode: none
+    params:query: {
+      ~ceremony_id: {{CEREMONY_ID}}
+    }
+  
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 536
+      etag: W/"218-AnaLpDiEk6VklvCjHR0pJiXF6TE"
+      date: Tue, 30 Jun 2026 03:21:40 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Categories fetched successfully",
+          "url": "/api/v1/categories",
+          "data": [
+            {
+              "id": "960b7709-b555-4684-82f1-4ac747f1e974",
+              "user_id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+              "name": "Venue Decoration",
+              "ceremony": "Traditional",
+              "created_at": "2026-06-30T03:17:04.898Z",
+              "updated_at": "2026-06-30T03:17:50.862Z"
+            },
+            {
+              "id": "38fa05a8-53e9-4700-b56d-88e0ec529455",
+              "user_id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+              "name": "Photography",
+              "ceremony": "tiem",
+              "created_at": "2026-06-30T03:18:18.975Z",
+              "updated_at": "2026-06-30T03:18:18.975Z"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

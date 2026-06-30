@@ -1,0 +1,79 @@
+meta {
+  name: List Currencies
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{BASE_URL}}/currencies
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/currencies
+    method: GET
+    mode: none
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 567
+      etag: W/"237-C3IQdv7w6HQxHiycoE40ka+mw8A"
+      date: Tue, 30 Jun 2026 03:13:38 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Currencies fetched successfully",
+          "url": "/api/v1/currencies",
+          "data": [
+            {
+              "id": "72d2c4a5-e1ee-4cfc-81f4-4ed0b6e718be",
+              "user_id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+              "currency_code": "NGN",
+              "created_at": "2026-06-30T03:10:50.660Z"
+            },
+            {
+              "id": "f2705fdb-ed5a-4a7c-911c-21f4f45767d4",
+              "user_id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+              "currency_code": "USD",
+              "created_at": "2026-06-30T03:10:50.660Z"
+            },
+            {
+              "id": "23168729-a71b-4732-818b-111e2c35c33e",
+              "user_id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+              "currency_code": "GBP",
+              "created_at": "2026-06-30T03:10:50.660Z"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

@@ -1,0 +1,21 @@
+meta {
+  name: Onboarding - Currencies
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{BASE_URL}}/auth/onboarding/currencies
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+body:json {
+  {
+    "currencies": ["NGN", "USD", "GBP"]
+  }
+}

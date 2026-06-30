@@ -1,0 +1,213 @@
+meta {
+  name: Create Vendor
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{BASE_URL}}/vendors
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+body:json {
+  {
+    "name": "LensCraft Studios",
+    "phone": "+2348023456789",
+    "email": "info@lenscraft.ng"
+  }
+}
+
+script:post-response {
+  if (res.status === 201) {
+    bru.setVar("VENDOR_ID", res.body.data.id);
+  }
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/vendors
+    method: POST
+    mode: json
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  
+    body:json: {
+      {
+        "name": "Bloom Floral Studio",
+        "phone": "+2348012345678",
+        "email": "bloom@floral.ng"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 357
+      etag: W/"165-b2YzEWpxfLr6GXKnsjen/KFhvf4"
+      date: Tue, 30 Jun 2026 03:14:39 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Vendor created successfully",
+          "url": "/api/v1/vendors",
+          "data": {
+            "id": "c85724e8-8397-42e3-87ab-3eef0066317b",
+            "user_id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+            "name": "Bloom Floral Studio",
+            "phone": "+2348012345678",
+            "email": "bloom@floral.ng",
+            "website": null,
+            "created_at": "2026-06-30T03:14:39.957Z",
+            "updated_at": "2026-06-30T03:14:39.957Z"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: example (1)
+  
+  request: {
+    url: {{BASE_URL}}/vendors
+    method: POST
+    mode: json
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  
+    body:json: {
+      {
+        "name": "Makeup By Feelz"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 328
+      etag: W/"148-0hT0lix+MtM34q7ITs1l4NA/cCY"
+      date: Tue, 30 Jun 2026 03:15:30 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Vendor created successfully",
+          "url": "/api/v1/vendors",
+          "data": {
+            "id": "bb9da6e4-79c3-4593-a541-1f5cdd19a057",
+            "user_id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+            "name": "Makeup By Feelz",
+            "phone": null,
+            "email": null,
+            "website": null,
+            "created_at": "2026-06-30T03:15:30.338Z",
+            "updated_at": "2026-06-30T03:15:30.338Z"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: example (2)
+  
+  request: {
+    url: {{BASE_URL}}/vendors
+    method: POST
+    mode: json
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  
+    body:json: {
+      {
+        "name": "LensCraft Studios",
+        "phone": "+2348023456789",
+        "email": "info@lenscraft.ng"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 357
+      etag: W/"165-MTBVt20KIgFplejHNtfNbgli8t4"
+      date: Tue, 30 Jun 2026 11:02:35 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Vendor created successfully",
+          "url": "/api/v1/vendors",
+          "data": {
+            "id": "0a8b8b4b-8f04-43dd-b957-8129e79b2d37",
+            "user_id": "8c867665-9464-4748-ada1-cf32dd070703",
+            "name": "LensCraft Studios",
+            "phone": "+2348023456789",
+            "email": "info@lenscraft.ng",
+            "website": null,
+            "created_at": "2026-06-30T11:02:35.039Z",
+            "updated_at": "2026-06-30T11:02:35.039Z"
+          }
+        }
+      '''
+    }
+  }
+}

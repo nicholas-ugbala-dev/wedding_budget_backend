@@ -1,0 +1,95 @@
+meta {
+  name: Update Expense
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{BASE_URL}}/expenses/{{EXPENSE_ID}}
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+body:json {
+  {
+    "actual_amount": 48000000,
+    "notes": "Updated after final quote — includes delivery fee",
+    "refundable_amount": 5000000,
+    "is_refunded": false
+  }
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/expenses/{{EXPENSE_ID}}
+    method: PATCH
+    mode: json
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  
+    body:json: {
+      {
+        "actual_amount": 48000000,
+        "notes": "Updated after final quote — includes delivery fee"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 674
+      etag: W/"2a2-75gEufspy7Kd1nC3ppmy33pJMZk"
+      date: Tue, 30 Jun 2026 03:54:49 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Expense updated successfully",
+          "url": "/api/v1/expenses/a3176a24-5f08-4342-94ef-6e55e3521482",
+          "data": {
+            "id": "a3176a24-5f08-4342-94ef-6e55e3521482",
+            "user_id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+            "name": "Wedding Cake",
+            "ceremony": "White Wedding",
+            "category_id": "a41be944-379a-48d9-b216-9224a314e455",
+            "category_name": "Catering",
+            "vendor_id": null,
+            "vendor_name": null,
+            "planned_amount": null,
+            "actual_amount": "48000000",
+            "base_currency": "NGN",
+            "notes": "Updated after final quote — includes delivery fee",
+            "is_planned": false,
+            "created_at": "2026-06-30T03:51:11.861Z",
+            "updated_at": "2026-06-30T03:54:49.283Z",
+            "total_paid": "0",
+            "balance": "48000000",
+            "status": "unpaid"
+          }
+        }
+      '''
+    }
+  }
+}

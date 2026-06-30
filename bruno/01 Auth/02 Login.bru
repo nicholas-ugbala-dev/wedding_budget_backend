@@ -1,0 +1,86 @@
+meta {
+  name: Login
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{BASE_URL}}/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "munachi@wedding.com",
+    "password": "Password123!"
+  }
+}
+
+script:post-response {
+  if (res.status === 200) {
+    bru.setEnvVar("AUTH_TOKEN", res.body.data.token);
+  }
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/auth/login
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "email": "munachi@wedding.com",
+        "password": "Password123!"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 552
+      etag: W/"228-zeveBjiJpoTr4W+nabutNAdZz2k"
+      date: Tue, 30 Jun 2026 03:07:43 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Login Successful",
+          "url": "/api/v1/auth/login",
+          "data": {
+            "user": {
+              "id": "13c2ad42-92c5-43e1-bd04-be89106f8967",
+              "first_name": "Munachi",
+              "last_name": "Iwotor",
+              "email": "munachi@wedding.com",
+              "account_type": "couple",
+              "base_currency": "NGN",
+              "event_name": null,
+              "event_date": null,
+              "wedding_location": null,
+              "created_at": "2026-06-30T03:05:24.888Z"
+            },
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEzYzJhZDQyLTkyYzUtNDNlMS1iZDA0LWJlODkxMDZmODk2NyIsImlhdCI6MTc4Mjc4ODg2MywiZXhwIjoxNzg1MzgwODYzfQ.gAjxkRyJPI92-Kfg8P_lugQTDcsB5NNgGAGxCryHUlQ"
+          }
+        }
+      '''
+    }
+  }
+}

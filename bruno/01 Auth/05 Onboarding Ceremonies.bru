@@ -1,0 +1,72 @@
+meta {
+  name: Onboarding - Ceremonies
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{BASE_URL}}/auth/onboarding/ceremonies
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+body:json {
+  {
+    "ceremonies": ["Traditional", "White Wedding", "Reception"]
+  }
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/auth/onboarding/ceremonies
+    method: POST
+    mode: json
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  
+    body:json: {
+      {
+        "ceremonies": ["Traditional", "White Wedding", "Reception"]
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 113
+      etag: W/"71-TsSeaGuuRCdBN+7shA0GNWiBBn8"
+      date: Tue, 30 Jun 2026 03:10:09 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Ceremonies saved successfully",
+          "url": "/api/v1/auth/onboarding/ceremonies",
+          "data": null
+        }
+      '''
+    }
+  }
+}
