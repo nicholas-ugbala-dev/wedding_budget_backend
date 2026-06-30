@@ -1,6 +1,12 @@
 import bcrypt from "bcryptjs";
 import { ApiError } from "../../utils/error";
-import { RegisterValidator, LoginValidator, OnboardingValidator } from "./validation/auth.validations";
+import {
+    RegisterValidator,
+    LoginValidator,
+    OnboardingValidator,
+    OnboardingCeremoniesValidator,
+    OnboardingCurrenciesValidator,
+} from "./validation/auth.validations";
 import { IAuthService, IAuthRepository, AuthResponse } from "./interface/auth.interface";
 import authRepository from "./repository/auth.repository";
 import { generateToken } from "../../utils/helpers/token.helper";
@@ -56,10 +62,17 @@ export class AuthService implements IAuthService {
     async updateOnboarding(userId: string, data: OnboardingValidator): Promise<SafeUser> {
         const user = await this.authRepository.findById(userId);
         if (!user) {
-            throw new ApiError(401, "User not found")
+            throw new ApiError(401, "User not found");
         }
         return this.authRepository.updateOnboarding(userId, data);
+    }
 
+    async saveOnboardingCeremonies(userId: string, data: OnboardingCeremoniesValidator): Promise<void> {
+        await this.authRepository.saveOnboardingCeremonies(userId, data.ceremonies);
+    }
+
+    async saveOnboardingCurrencies(userId: string, data: OnboardingCurrenciesValidator): Promise<void> {
+        await this.authRepository.saveOnboardingCurrencies(userId, data.currencies);
     }
 
     async forgotPassword(email: string): Promise<void> {

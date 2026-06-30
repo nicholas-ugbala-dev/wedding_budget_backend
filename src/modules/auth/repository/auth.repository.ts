@@ -10,6 +10,8 @@ const {
     findByEmail,
     findById,
     updateOnboarding,
+    bulkInsertCeremonies,
+    bulkInsertCurrencies,
     createResetToken,
     findResetToken,
     deleteResetToken,
@@ -18,14 +20,15 @@ const {
 
 export class AuthRepository implements IAuthRepository {
     async register(data: RegisterValidator, hashedPassword: string): Promise<SafeUser> {
-        const { first_name, last_name, email } = data;
+        const { first_name, last_name, email, account_type } = data;
 
         const result: SafeUser = await dbQuery.one(register, [
             first_name,
             last_name,
             email,
             hashedPassword,
-        ])
+            account_type,
+        ]);
 
         return result;
     };
@@ -41,14 +44,31 @@ export class AuthRepository implements IAuthRepository {
     }
 
     async updateOnboarding(userId: string, data: OnboardingValidator): Promise<SafeUser> {
-        const { base_currency, wedding_location } = data;
+        const { base_currency, event_name, event_date, wedding_location } = data;
         const result: SafeUser = await dbQuery.one(updateOnboarding, [
             base_currency,
+            event_name,
+            event_date,
             wedding_location,
             userId,
         ]);
 
         return result;
+    }
+
+    async saveOnboardingCeremonies(userId: string, ceremonies: string[]): Promise<void> {
+        await dbQuery.manyOrNone(bulkInsertCeremonies(ceremonies.length), [
+            userId,
+            ...ceremonies,
+        ]);
+    }
+
+    async saveOnboardingCurrencies(userId: string, currencies: string[]): Promise<void> {
+        if (currencies.length === 0) return;
+        await dbQuery.manyOrNone(bulkInsertCurrencies(currencies.length), [
+            userId,
+            ...currencies.map(c => c.toUpperCase()),
+        ]);
     }
 
     async createResetToken(userId: string, ): Promise<string> {

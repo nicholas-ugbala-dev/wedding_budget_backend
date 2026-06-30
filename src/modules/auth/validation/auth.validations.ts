@@ -5,6 +5,7 @@ export const registerValidator = z.object({
     last_name: z.string().min(1, "Last Name is required"),
     email: z.email("Invalid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
+    account_type: z.enum(['couple', 'planner']).default('couple'),
 });
 
 export const loginValidator = z.object({
@@ -14,7 +15,17 @@ export const loginValidator = z.object({
 
 export const onboardingValidator = z.object({
     base_currency: z.string().length(3, "Currency must be a 3-letter code").toUpperCase(),
+    event_name: z.string().min(1, "Event name is required"),
+    event_date: z.iso.date("Invalid date format"),
     wedding_location: z.string().min(1, "Wedding location is required"),
+});
+
+export const onboardingCeremoniesValidator = z.object({
+    ceremonies: z.array(z.string().min(1)).min(1, "At least one ceremony is required"),
+});
+
+export const onboardingCurrenciesValidator = z.object({
+    currencies: z.array(z.string().length(3, "Currency must be a 3-letter code")),
 });
 
 export const forgotPasswordValidator = z.object({
@@ -30,5 +41,7 @@ export const resetPasswordValidator = z.object({
 export type RegisterValidator = z.infer<typeof registerValidator>;
 export type LoginValidator = z.infer<typeof loginValidator>;
 export type OnboardingValidator = z.infer<typeof onboardingValidator>;
+export type OnboardingCeremoniesValidator = z.infer<typeof onboardingCeremoniesValidator>;
+export type OnboardingCurrenciesValidator = z.infer<typeof onboardingCurrenciesValidator>;
 export type ForgotPasswordValidator = z.infer<typeof forgotPasswordValidator>;
 export type ResetPasswordValidator = z.infer<typeof resetPasswordValidator>;

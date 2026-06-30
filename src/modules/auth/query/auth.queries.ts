@@ -1,28 +1,45 @@
 const register = `
-    INSERT INTO users (first_name, last_name, email, password)
-    VALUES ($1, $2, $3, $4)
-    RETURNING id, first_name, last_name, email, base_currency, wedding_location, created_at
+    INSERT INTO users (first_name, last_name, email, password, account_type)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING id, first_name, last_name, email, account_type, base_currency,
+              event_name, event_date, wedding_location, created_at
 `;
 
 const findByEmail = `
     SELECT id, first_name, last_name, email, password,
-           base_currency, wedding_location, created_at
+           account_type, base_currency, event_name, event_date, wedding_location, created_at
     FROM users
     WHERE email = $1
 `;
 
 const findById = `
-    SELECT id, first_name, last_name, email, base_currency, wedding_location, created_at
+    SELECT id, first_name, last_name, email,
+           account_type, base_currency, event_name, event_date, wedding_location, created_at
     FROM users
     WHERE id = $1
 `;
 
 const updateOnboarding = `
     UPDATE users
-    SET base_currency = $1, wedding_location = $2
-    WHERE id = $3
-    RETURNING id, first_name, last_name, email, base_currency, wedding_location, created_at
+    SET base_currency = $1, event_name = $2, event_date = $3, wedding_location = $4
+    WHERE id = $5
+    RETURNING id, first_name, last_name, email,
+              account_type, base_currency, event_name, event_date, wedding_location, created_at
 `;
+
+const bulkInsertCeremonies = (count: number): string => {
+    const values = Array.from({ length: count }, (_, i) => `($1, $${i + 2})`).join(', ');
+    return `INSERT INTO ceremonies (user_id, name) VALUES ${values}`;
+};
+
+const bulkInsertCurrencies = (count: number): string => {
+    const values = Array.from({ length: count }, (_, i) => `($1, $${i + 2})`).join(', ');
+    return `
+        INSERT INTO user_currencies (user_id, currency_code)
+        VALUES ${values}
+        ON CONFLICT (user_id, currency_code) DO NOTHING
+    `;
+};
 
 const createResetToken = `
     INSERT INTO password_reset_tokens (user_id, token, expires_at)
@@ -54,6 +71,8 @@ const AuthQueries = {
     findByEmail,
     findById,
     updateOnboarding,
+    bulkInsertCeremonies,
+    bulkInsertCurrencies,
     createResetToken,
     findResetToken,
     deleteResetToken,

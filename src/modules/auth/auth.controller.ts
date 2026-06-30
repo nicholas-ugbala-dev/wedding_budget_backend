@@ -3,10 +3,12 @@ import { StatusCodes } from "http-status-codes";
 import { ResponseHandler } from "../../utils/helpers/response.handler";
 import { IAuthService } from "./interface/auth.interface";
 import authService from "./auth.service";
-import { 
+import {
   RegisterValidator,
   LoginValidator,
   OnboardingValidator,
+  OnboardingCeremoniesValidator,
+  OnboardingCurrenciesValidator,
   ForgotPasswordValidator,
   ResetPasswordValidator,
 } from "./validation/auth.validations";
@@ -81,6 +83,32 @@ export class AuthController {
     });
   }
 
+  saveOnboardingCeremonies = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+    const userId = req.user?.id as string;
+    const data = req.body as OnboardingCeremoniesValidator;
+
+    await this.authService.saveOnboardingCeremonies(userId, data);
+
+    const response = new ResponseHandler(req, res);
+    response.success({
+      message: "Ceremonies saved successfully",
+      code: StatusCodes.OK,
+    });
+  };
+
+  saveOnboardingCurrencies = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+    const userId = req.user?.id as string;
+    const data = req.body as OnboardingCurrenciesValidator;
+
+    await this.authService.saveOnboardingCurrencies(userId, data);
+
+    const response = new ResponseHandler(req, res);
+    response.success({
+      message: "Currencies saved successfully",
+      code: StatusCodes.OK,
+    });
+  };
+
   resetPassword = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
     const { token, new_password } = req.body as ResetPasswordValidator;
 
@@ -90,8 +118,8 @@ export class AuthController {
     response.success({
       message: "Password reset successfully",
       code: StatusCodes.OK,
-    })
-  }
+    });
+  };
 }
 
 export const authController = new AuthController(authService);

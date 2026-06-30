@@ -5,8 +5,11 @@ CREATE TABLE users (
     email               VARCHAR(255) NOT NULL UNIQUE,
     password            VARCHAR(255) NOT NULL,
     partner_id          UUID UNIQUE REFERENCES users(id) ON DELETE SET NULL,
-    base_currency       VARCHAR(50) NOT NULL DEFAULT 'NGN',
-    wedding_location    VARCHAR(50),
+    account_type        VARCHAR(20) NOT NULL DEFAULT 'couple',
+    base_currency       VARCHAR(3) NOT NULL DEFAULT 'NGN',
+    event_name          VARCHAR(200),
+    event_date          DATE,
+    wedding_location    VARCHAR(100),
     created_at          TIMESTAMPTZ DEFAULT NOW(),
     updated_at          TIMESTAMPTZ DEFAULT NOW()
 );
@@ -36,10 +39,11 @@ CREATE TABLE expenses (
     user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     category_id     UUID NOT NULL REFERENCES categories(id),
     vendor_id       UUID REFERENCES vendors(id) ON DELETE SET NULL,
-    name            VARCHAR(50) NOT NULL,
-    ceremony        VARCHAR(50) NOT NULL,
+    name            VARCHAR(100) NOT NULL,
+    ceremony        VARCHAR(100) NOT NULL,
+    planned_amount  BIGINT,
     actual_amount   BIGINT,
-    base_currency   VARCHAR(50) NOT NULL DEFAULT 'NGN',
+    base_currency   VARCHAR(3) NOT NULL DEFAULT 'NGN',
     notes           TEXT,
     is_planned      BOOLEAN DEFAULT FALSE,
     created_at      TIMESTAMPTZ DEFAULT NOW(),
@@ -78,6 +82,21 @@ CREATE TABLE password_reset_tokens (
     created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE ceremonies (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name        VARCHAR(100) NOT NULL,
+    created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE user_currencies (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    currency_code   VARCHAR(3) NOT NULL,
+    created_at      TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id, currency_code)
+);
+
 
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
@@ -106,3 +125,12 @@ CREATE TRIGGER set_updated_at_expenses
 CREATE TRIGGER set_updated_at_payments
   BEFORE UPDATE ON payments
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- Indexes for dashboard query performance
+CREATE INDEX idx_expenses_user_ceremony ON expenses (user_id, ceremony);
+CREATE INDEX idx_expenses_user_id ON expenses (user_id);
+CREATE INDEX idx_payments_expense_active ON payments (expense_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_categories_user_id ON categories (user_id);
+CREATE INDEX idx_vendors_user_id ON vendors (user_id);
+CREATE INDEX idx_ceremonies_user_id ON ceremonies (user_id);
+CREATE INDEX idx_user_currencies_user_id ON user_currencies (user_id);

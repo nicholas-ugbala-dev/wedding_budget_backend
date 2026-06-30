@@ -7,6 +7,8 @@ import {
   registerValidator,
   loginValidator,
   onboardingValidator,
+  onboardingCeremoniesValidator,
+  onboardingCurrenciesValidator,
   resetPasswordValidator,
   forgotPasswordValidator,
 } from './validation/auth.validations';
@@ -41,6 +43,20 @@ router.patch(
 );
 
 router.post(
+  '/onboarding/ceremonies',
+  tokenGuard,
+  validateRequest(onboardingCeremoniesValidator),
+  tryCatch(authController.saveOnboardingCeremonies),
+);
+
+router.post(
+  '/onboarding/currencies',
+  tokenGuard,
+  validateRequest(onboardingCurrenciesValidator),
+  tryCatch(authController.saveOnboardingCurrencies),
+);
+
+router.post(
   '/forgot-password',
   validateRequest(forgotPasswordValidator),
   tryCatch(authController.forgotPassword),
@@ -49,7 +65,7 @@ router.post(
 router.post(
   '/reset-password',
   validateRequest(resetPasswordValidator),
-  tryCatch(authController.resetPassword)
-)
+  tryCatch(authController.resetPassword),
+);
 
 export const authRouter = router;
