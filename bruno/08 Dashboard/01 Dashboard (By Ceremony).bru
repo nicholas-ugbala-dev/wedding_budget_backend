@@ -1,17 +1,13 @@
 meta {
-  name: Payment Summary
+  name: Dashboard (By Ceremony)
   type: http
   seq: 1
 }
 
 get {
-  url: {{BASE_URL}}/payments/summary
+  url: {{BASE_URL}}/dashboard?ceremony_id={{CEREMONY_ID}}
   body: none
   auth: none
-}
-
-params:query {
-  ~ceremony_id: {{CEREMONY_ID}}
 }
 
 headers {

@@ -1,0 +1,15 @@
+meta {
+  name: Dashboard (All Ceremonies)
+  type: http
+  seq: 0
+}
+
+get {
+  url: {{BASE_URL}}/dashboard
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
