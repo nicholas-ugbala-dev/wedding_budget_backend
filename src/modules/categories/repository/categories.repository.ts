@@ -7,24 +7,24 @@ import CategoriesQueries from '../query/categories.queries';
 const { findAll, findById, findByNameAndCeremony, create, update, remove } = CategoriesQueries;
 
 export class CategoriesRepository implements ICategoriesRepository {
-    async findAll(userId: string, ceremony?: string): Promise<Category[]> {
-        return (await dbQuery.manyOrNone<Category>(findAll, [userId, ceremony ?? null])) ?? [];
+    async findAll(userId: string, ceremonyId?: string): Promise<Category[]> {
+        return (await dbQuery.manyOrNone<Category>(findAll, [userId, ceremonyId ?? null])) ?? [];
     }
 
     async findById(id: string, userId: string): Promise<Category | null> {
         return dbQuery.oneOrNone<Category>(findById, [id, userId]);
     }
 
-    async findByNameAndCeremony(userId: string, name: string, ceremony: string): Promise<Category | null> {
-        return dbQuery.oneOrNone<Category>(findByNameAndCeremony, [userId, name, ceremony]);
+    async findByNameAndCeremony(userId: string, name: string, ceremonyId: string): Promise<Category | null> {
+        return dbQuery.oneOrNone<Category>(findByNameAndCeremony, [userId, name, ceremonyId]);
     }
 
     async create(userId: string, data: CreateCategoryValidator): Promise<Category> {
-        return dbQuery.one<Category>(create, [userId, data.name, data.ceremony]);
+        return dbQuery.one<Category>(create, [userId, data.ceremony_id, data.name]);
     }
 
     async findOrCreate(userId: string, data: CreateCategoryValidator): Promise<Category> {
-        const existing = await this.findByNameAndCeremony(userId, data.name, data.ceremony);
+        const existing = await this.findByNameAndCeremony(userId, data.name, data.ceremony_id);
         if (existing) return existing;
         return this.create(userId, data);
     }
@@ -32,7 +32,7 @@ export class CategoriesRepository implements ICategoriesRepository {
     async update(id: string, userId: string, data: UpdateCategoryValidator): Promise<Category> {
         return dbQuery.one<Category>(update, [
             data.name ?? null,
-            data.ceremony ?? null,
+            data.ceremony_id ?? null,
             id,
             userId,
         ]);
