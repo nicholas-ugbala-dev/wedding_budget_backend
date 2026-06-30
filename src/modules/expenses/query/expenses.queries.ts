@@ -6,7 +6,7 @@ export const BASE_SELECT = `
         e.vendor_id,   v.name                                                        AS vendor_name,
         e.planned_amount, e.actual_amount, e.base_currency,
         e.refundable_amount, e.is_refunded, e.refunded_at,
-        e.notes, e.is_planned, e.created_at, e.updated_at,
+        e.notes, e.is_planned, e.payment_deadline, e.created_at, e.updated_at,
         COALESCE(SUM(p.base_amount) FILTER (WHERE p.deleted_at IS NULL), 0)          AS total_paid,
         COALESCE(e.actual_amount, 0)
             - COALESCE(SUM(p.base_amount) FILTER (WHERE p.deleted_at IS NULL), 0)   AS balance,
@@ -34,7 +34,7 @@ const findById = `
         e.vendor_id,   v.name                                                        AS vendor_name,
         e.planned_amount, e.actual_amount, e.base_currency,
         e.refundable_amount, e.is_refunded, e.refunded_at,
-        e.notes, e.is_planned, e.created_at, e.updated_at,
+        e.notes, e.is_planned, e.payment_deadline, e.created_at, e.updated_at,
         COALESCE(SUM(p.base_amount) FILTER (WHERE p.deleted_at IS NULL), 0)          AS total_paid,
         COALESCE(e.actual_amount, 0)
             - COALESCE(SUM(p.base_amount) FILTER (WHERE p.deleted_at IS NULL), 0)   AS balance,
@@ -83,19 +83,19 @@ const findRawById = `
 `;
 
 // $1=user_id $2=category_id $3=vendor_id $4=ceremony_id $5=name
-// $6=planned_amount $7=actual_amount $8=base_currency $9=refundable_amount $10=is_planned $11=notes
+// $6=planned_amount $7=actual_amount $8=base_currency $9=refundable_amount $10=is_planned $11=payment_deadline $12=notes
 const create = `
     INSERT INTO expenses
         (user_id, category_id, vendor_id, ceremony_id, name,
-         planned_amount, actual_amount, base_currency, refundable_amount, is_planned, notes)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+         planned_amount, actual_amount, base_currency, refundable_amount, is_planned, payment_deadline, notes)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
     RETURNING id
 `;
 
 // Full replace — service merges patch with existing before calling
 // $1=name $2=ceremony_id $3=category_id $4=vendor_id $5=planned_amount
 // $6=actual_amount $7=is_planned $8=notes $9=refundable_amount $10=is_refunded $11=refunded_at
-// $12=id $13=user_id
+// $12=payment_deadline $13=id $14=user_id
 const update = `
     UPDATE expenses
     SET
@@ -109,8 +109,9 @@ const update = `
         notes             = $8,
         refundable_amount = $9,
         is_refunded       = $10,
-        refunded_at       = $11
-    WHERE id = $12 AND user_id = $13
+        refunded_at       = $11,
+        payment_deadline  = $12
+    WHERE id = $13 AND user_id = $14
 `;
 
 const remove = `

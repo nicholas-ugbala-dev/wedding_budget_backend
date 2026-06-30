@@ -86,6 +86,7 @@ export class ExpensesRepository implements IExpensesRepository {
             data.base_currency ?? 'NGN',
             data.refundable_amount ?? 0,
             data.is_planned ?? false,
+            data.payment_deadline ?? null,
             data.notes ?? null,
         ]);
 
@@ -108,17 +109,18 @@ export class ExpensesRepository implements IExpensesRepository {
         }
 
         await dbQuery.manyOrNone(update, [
-            data.name                ?? existing.name,
-            data.ceremony_id         ?? existing.ceremony_id,
-            data.category_id         ?? existing.category_id,
-            'vendor_id' in data      ? (data.vendor_id ?? null) : existing.vendor_id,
-            'planned_amount' in data ? (data.planned_amount ?? null) : existing.planned_amount,
-            'actual_amount'  in data ? (data.actual_amount  ?? null) : existing.actual_amount,
-            data.is_planned          ?? existing.is_planned,
-            'notes' in data          ? (data.notes ?? null) : existing.notes,
-            data.refundable_amount   ?? existing.refundable_amount,
+            data.name                     ?? existing.name,
+            data.ceremony_id              ?? existing.ceremony_id,
+            data.category_id              ?? existing.category_id,
+            'vendor_id' in data           ? (data.vendor_id ?? null) : existing.vendor_id,
+            'planned_amount' in data      ? (data.planned_amount ?? null) : existing.planned_amount,
+            'actual_amount'  in data      ? (data.actual_amount  ?? null) : existing.actual_amount,
+            data.is_planned               ?? existing.is_planned,
+            'notes' in data               ? (data.notes ?? null) : existing.notes,
+            data.refundable_amount        ?? existing.refundable_amount,
             isRefunded,
             refundedAt ? refundedAt.toISOString() : null,
+            'payment_deadline' in data    ? (data.payment_deadline ?? null) : (existing.payment_deadline ? existing.payment_deadline.toISOString().split('T')[0] : null),
             id,
             userId,
         ]);

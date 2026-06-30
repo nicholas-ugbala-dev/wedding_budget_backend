@@ -6,6 +6,7 @@ import { vendorsRouter } from "../../modules/vendors/vendors.routes";
 import { categoriesRouter } from "../../modules/categories/categories.routes";
 import { expensesRouter } from "../../modules/expenses/expenses.routes";
 import { paymentsRouter } from "../../modules/payments/payments.routes";
+import { dashboardRouter } from "../../modules/dashboard/dashboard.routes";
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use('/vendors', vendorsRouter);
 router.use('/categories', categoriesRouter);
 router.use('/expenses', expensesRouter);
 router.use('/payments', paymentsRouter);
+router.use('/dashboard', dashboardRouter);
 
 export default router;

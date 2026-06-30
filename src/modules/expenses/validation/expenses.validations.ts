@@ -17,6 +17,7 @@ export const createExpenseValidator = z.object({
     base_currency: z.string().length(3).toUpperCase().optional(),
     refundable_amount: z.number().int().nonnegative().optional(),
     is_planned: z.boolean().optional().default(false),
+    payment_deadline: z.string().date().optional(),
     notes: z.string().optional(),
 }).refine(
     (d) => d.category_id || d.category_name,
@@ -33,6 +34,7 @@ export const updateExpenseValidator = z.object({
     refundable_amount: z.number().int().nonnegative().optional(),
     is_refunded: z.boolean().optional(),
     is_planned: z.boolean().optional(),
+    payment_deadline: z.string().date().nullable().optional(),
     notes: z.string().nullable().optional(),
 });
 

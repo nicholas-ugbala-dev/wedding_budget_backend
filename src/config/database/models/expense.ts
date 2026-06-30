@@ -13,6 +13,7 @@ export interface Expense {
     refunded_at: Date | null;
     notes: string | null;
     is_planned: boolean;
+    payment_deadline: Date | null;
     created_at: Date;
     updated_at: Date;
 }

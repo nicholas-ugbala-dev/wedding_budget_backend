@@ -22,6 +22,7 @@ export interface ExpenseRow {
     refunded_at: Date | null;
     notes: string | null;
     is_planned: boolean;
+    payment_deadline: Date | null;
     total_paid: number;
     balance: number;
     status: ExpenseStatus;
