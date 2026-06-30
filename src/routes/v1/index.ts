@@ -5,6 +5,7 @@ import { currenciesRouter } from "../../modules/currencies/currencies.routes";
 import { vendorsRouter } from "../../modules/vendors/vendors.routes";
 import { categoriesRouter } from "../../modules/categories/categories.routes";
 import { expensesRouter } from "../../modules/expenses/expenses.routes";
+import { paymentsRouter } from "../../modules/payments/payments.routes";
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.use('/currencies', currenciesRouter);
 router.use('/vendors', vendorsRouter);
 router.use('/categories', categoriesRouter);
 router.use('/expenses', expensesRouter);
+router.use('/payments', paymentsRouter);
 
 export default router;
