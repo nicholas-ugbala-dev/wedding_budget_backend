@@ -1,0 +1,19 @@
+meta {
+  name: Payment Summary
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{BASE_URL}}/payments/summary
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+params:query {
+  ~ceremony_id: {{CEREMONY_ID}}
+}

@@ -1,0 +1,22 @@
+meta {
+  name: List Payments
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{BASE_URL}}/payments
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+params:query {
+  page: 1
+  limit: 10
+  ~ceremony_id: {{CEREMONY_ID}}
+  ~expense_id: {{EXPENSE_ID}}
+}

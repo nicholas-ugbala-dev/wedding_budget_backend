@@ -1,0 +1,110 @@
+meta {
+  name: Add Payment (Foreign Currency)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{BASE_URL}}/expenses/{{EXPENSE_ID}}/payments
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+body:json {
+  {
+    "payment_type": "deposit",
+    "user_currency_id": "{{USD_CURRENCY_ID}}",
+    "wallet_amount": 10000,
+    "exchange_rate": 1650,
+    "base_amount": 16500000,
+    "payment_date": "2026-06-30T14:00:00.000Z",
+    "notes": "USD deposit - $100 at 1650 NGN/USD"
+  }
+}
+
+vars:pre-request {
+  USD_CURRENCY_ID: 507c4933-a3f9-4dc0-8aa9-5085053eea53
+}
+
+script:post-response {
+  if (res.status === 201) {
+    bru.setVar("PAYMENT_ID", res.body.data.id);
+  }
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/expenses/{{EXPENSE_ID}}/payments
+    method: POST
+    mode: json
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  
+    body:json: {
+      {
+        "payment_type": "deposit",
+        "user_currency_id": "{{USD_CURRENCY_ID}}",
+        "wallet_amount": 10000,
+        "exchange_rate": 1650,
+        "base_amount": 16500000,
+        "payment_date": "2026-06-30T14:00:00.000Z",
+        "notes": "USD deposit - $100 at 1650 NGN/USD"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 707
+      etag: W/"2c3-N7qgY7SR9u3qu3mJ/INgtk+xgVY"
+      date: Tue, 30 Jun 2026 13:15:14 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Payment added successfully",
+          "url": "/api/v1/expenses/c0913dfe-bdac-4389-9f42-0c57f6523c71/payments",
+          "data": {
+            "id": "9f90d94a-cfea-43a6-af89-324097d126fa",
+            "expense_id": "c0913dfe-bdac-4389-9f42-0c57f6523c71",
+            "expense_name": "Floral Arrangements",
+            "ceremony_id": "624f971d-2b31-4030-8549-14debc5a6039",
+            "ceremony_name": "Engagement Party",
+            "payment_type": "deposit",
+            "user_currency_id": "507c4933-a3f9-4dc0-8aa9-5085053eea53",
+            "wallet_currency_code": "USD",
+            "wallet_amount": "10000",
+            "exchange_rate": "1650",
+            "base_amount": "16500000",
+            "payment_date": "2026-06-30T14:00:00.000Z",
+            "notes": "USD deposit - $100 at 1650 NGN/USD",
+            "created_at": "2026-06-30T13:15:14.713Z",
+            "updated_at": "2026-06-30T13:15:14.713Z"
+          }
+        }
+      '''
+    }
+  }
+}

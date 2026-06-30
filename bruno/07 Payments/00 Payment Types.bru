@@ -1,0 +1,15 @@
+meta {
+  name: Payment Types
+  type: http
+  seq: 0
+}
+
+get {
+  url: {{BASE_URL}}/payments/types
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}

@@ -1,0 +1,60 @@
+meta {
+  name: Delete Payment
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{BASE_URL}}/expenses/{{EXPENSE_ID}}/payments/{{PAYMENT_ID}}
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+example {
+  name: example
+  
+  request: {
+    url: {{BASE_URL}}/expenses/{{EXPENSE_ID}}/payments/{{PAYMENT_ID}}
+    method: DELETE
+    mode: none
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+  }
+  
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      content-length: 177
+      etag: W/"b1-zhx8Tl6sGSTDSNFrh557meBnpv4"
+      date: Tue, 30 Jun 2026 13:20:36 GMT
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Payment removed successfully",
+          "url": "/api/v1/expenses/c0913dfe-bdac-4389-9f42-0c57f6523c71/payments/9c9fa64c-2d95-43d9-8039-38b04337edea",
+          "data": null
+        }
+      '''
+    }
+  }
+}
