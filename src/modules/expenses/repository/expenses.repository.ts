@@ -12,9 +12,9 @@ export class ExpensesRepository implements IExpensesRepository {
         const params: (string | number | null)[] = [userId];
         const where: string[] = ['e.user_id = $1'];
 
-        if (filters.ceremony_id) {
-            params.push(filters.ceremony_id);
-            where.push(`e.ceremony_id = $${params.length}::uuid`);
+        if (filters.event_id) {
+            params.push(filters.event_id);
+            where.push(`e.event_id = $${params.length}::uuid`);
         }
 
         if (filters.search) {
@@ -35,7 +35,7 @@ export class ExpensesRepository implements IExpensesRepository {
         const innerSQL = `
             ${BASE_SELECT}
             WHERE ${where.join(' AND ')}
-            GROUP BY e.id, cer.name, c.name, v.name
+            GROUP BY e.id, ev.name, c.name, v.name
             ${having.length ? `HAVING ${having.join(' AND ')}` : ''}
             ORDER BY e.created_at DESC
         `;
@@ -79,7 +79,7 @@ export class ExpensesRepository implements IExpensesRepository {
             userId,
             resolvedCategoryId,
             resolvedVendorId,
-            data.ceremony_id,
+            data.event_id,
             data.name,
             data.planned_amount ?? null,
             data.actual_amount ?? null,
@@ -110,7 +110,7 @@ export class ExpensesRepository implements IExpensesRepository {
 
         await dbQuery.manyOrNone(update, [
             data.name                     ?? existing.name,
-            data.ceremony_id              ?? existing.ceremony_id,
+            data.event_id                 ?? existing.event_id,
             data.category_id              ?? existing.category_id,
             'vendor_id' in data           ? (data.vendor_id ?? null) : existing.vendor_id,
             'planned_amount' in data      ? (data.planned_amount ?? null) : existing.planned_amount,

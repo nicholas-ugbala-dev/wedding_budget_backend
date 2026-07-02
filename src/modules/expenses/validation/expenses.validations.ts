@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 export const createExpenseValidator = z.object({
     name: z.string().min(1, "Expense name is required").max(100),
-    ceremony_id: z.string().uuid("Invalid ceremony ID"),
-    // Category: pass existing id OR name (service will findOrCreate by name+ceremony_id)
+    event_id: z.string().uuid("Invalid event ID"),
+    // Category: pass existing id OR name (service will findOrCreate by name+event_id)
     category_id: z.string().uuid("Invalid category ID").optional(),
     category_name: z.string().min(1).max(100).optional(),
     // Vendor: all optional inline creation fields
@@ -26,7 +26,7 @@ export const createExpenseValidator = z.object({
 
 export const updateExpenseValidator = z.object({
     name: z.string().min(1).max(100).optional(),
-    ceremony_id: z.string().uuid("Invalid ceremony ID").optional(),
+    event_id: z.string().uuid("Invalid event ID").optional(),
     category_id: z.string().uuid().optional(),
     vendor_id: z.string().uuid().nullable().optional(),
     planned_amount: z.number().int().nonnegative().nullable().optional(),
@@ -39,7 +39,7 @@ export const updateExpenseValidator = z.object({
 });
 
 export const listExpensesValidator = z.object({
-    ceremony_id: z.string().uuid().optional(),
+    event_id: z.string().uuid().optional(),
     status: z.enum(['unpaid', 'partial', 'paid']).optional(),
     search: z.string().optional(),
     page: z.coerce.number().int().min(1).default(1),

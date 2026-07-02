@@ -36,8 +36,8 @@ export class PaymentsController {
 
     summary = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
         const userId = req.user?.id as string;
-        const { ceremony_id } = req.query as unknown as PaymentsSummaryValidator;
-        const data = await this.service.summary(userId, ceremony_id);
+        const { event_id } = req.query as unknown as PaymentsSummaryValidator;
+        const data = await this.service.summary(userId, event_id);
 
         new ResponseHandler(req, res).success({
             message: 'Payment summary fetched successfully',

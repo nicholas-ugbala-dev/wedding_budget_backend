@@ -2,16 +2,16 @@ import { z } from 'zod';
 
 export const createCategoryValidator = z.object({
     name: z.string().min(1, "Category name is required").max(100),
-    ceremony_id: z.string().uuid("Invalid ceremony ID"),
+    event_id: z.string().uuid("Invalid event ID"),
 });
 
 export const updateCategoryValidator = z.object({
     name: z.string().min(1, "Category name is required").max(100).optional(),
-    ceremony_id: z.string().uuid("Invalid ceremony ID").optional(),
+    event_id: z.string().uuid("Invalid event ID").optional(),
 });
 
 export const listCategoriesValidator = z.object({
-    ceremony_id: z.string().uuid().optional(),
+    event_id: z.string().uuid().optional(),
 });
 
 export type CreateCategoryValidator = z.infer<typeof createCategoryValidator>;

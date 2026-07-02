@@ -8,8 +8,8 @@ export interface ExpenseRow {
     id: string;
     user_id: string;
     name: string;
-    ceremony_id: string;
-    ceremony_name: string;
+    event_id: string;
+    event_name: string;
     category_id: string;
     category_name: string;
     vendor_id: string | null;

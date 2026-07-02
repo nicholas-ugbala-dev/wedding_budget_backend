@@ -7,7 +7,7 @@ import {
   registerValidator,
   loginValidator,
   onboardingValidator,
-  onboardingCeremoniesValidator,
+  onboardingEventsValidator,
   onboardingCurrenciesValidator,
   resetPasswordValidator,
   forgotPasswordValidator,
@@ -43,10 +43,10 @@ router.patch(
 );
 
 router.post(
-  '/onboarding/ceremonies',
+  '/onboarding/events',
   tokenGuard,
-  validateRequest(onboardingCeremoniesValidator),
-  tryCatch(authController.saveOnboardingCeremonies),
+  validateRequest(onboardingEventsValidator),
+  tryCatch(authController.saveOnboardingEvents),
 );
 
 router.post(

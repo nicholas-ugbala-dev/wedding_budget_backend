@@ -27,9 +27,9 @@ const updateOnboarding = `
               account_type, base_currency, event_name, event_date, wedding_location, created_at
 `;
 
-const bulkInsertCeremonies = (count: number): string => {
+const bulkInsertEvents = (count: number): string => {
     const values = Array.from({ length: count }, (_, i) => `($1, $${i + 2})`).join(', ');
-    return `INSERT INTO ceremonies (user_id, name) VALUES ${values}`;
+    return `INSERT INTO events (user_id, name) VALUES ${values}`;
 };
 
 const bulkInsertCurrencies = (count: number): string => {
@@ -71,7 +71,7 @@ const AuthQueries = {
     findByEmail,
     findById,
     updateOnboarding,
-    bulkInsertCeremonies,
+    bulkInsertEvents,
     bulkInsertCurrencies,
     createResetToken,
     findResetToken,

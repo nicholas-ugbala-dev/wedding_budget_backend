@@ -5,8 +5,8 @@ import { PaginatedResult } from '../../../utils/helpers/pagination.helper';
 export interface PaymentRow extends Omit<Payment, 'deleted_at'> {
     wallet_currency_code: string;
     expense_name: string;
-    ceremony_id: string;
-    ceremony_name: string;
+    event_id: string;
+    event_name: string;
 }
 
 export interface PaymentSummary {
@@ -19,7 +19,7 @@ export interface PaymentSummary {
 export interface IPaymentsRepository {
     findAll(userId: string, filters: ListPaymentsValidator): Promise<{ rows: PaymentRow[]; total: number }>;
     findById(id: string, expenseId: string, userId: string): Promise<PaymentRow | null>;
-    getSummary(userId: string, ceremonyId?: string): Promise<PaymentSummary>;
+    getSummary(userId: string, eventId?: string): Promise<PaymentSummary>;
     create(expenseId: string, userId: string, data: CreatePaymentValidator, resolvedBaseAmount: number, resolvedExchangeRate: number | null): Promise<PaymentRow>;
     update(id: string, expenseId: string, userId: string, data: UpdatePaymentValidator): Promise<PaymentRow>;
     softDelete(id: string, expenseId: string, userId: string): Promise<void>;
@@ -27,7 +27,7 @@ export interface IPaymentsRepository {
 
 export interface IPaymentsService {
     list(userId: string, filters: ListPaymentsValidator): Promise<PaginatedResult<PaymentRow>>;
-    summary(userId: string, ceremonyId?: string): Promise<PaymentSummary>;
+    summary(userId: string, eventId?: string): Promise<PaymentSummary>;
     create(expenseId: string, userId: string, data: CreatePaymentValidator): Promise<PaymentRow>;
     update(id: string, expenseId: string, userId: string, data: UpdatePaymentValidator): Promise<PaymentRow>;
     delete(id: string, expenseId: string, userId: string): Promise<void>;

@@ -1,7 +1,7 @@
 export const BASE_SELECT = `
     SELECT
         p.id, p.expense_id, e.name         AS expense_name,
-        e.ceremony_id, cer.name            AS ceremony_name,
+        e.event_id, ev.name             AS event_name,
         p.payment_type,
         p.user_currency_id, uc.currency_code AS wallet_currency_code,
         p.wallet_amount, p.exchange_rate, p.base_amount,
@@ -9,7 +9,7 @@ export const BASE_SELECT = `
         p.created_at, p.updated_at
     FROM payments p
     JOIN expenses e ON e.id = p.expense_id
-    LEFT JOIN ceremonies cer ON cer.id = e.ceremony_id
+    LEFT JOIN events     ev  ON ev.id  = e.event_id
     JOIN user_currencies uc ON uc.id = p.user_currency_id
 `;
 
@@ -37,7 +37,7 @@ const softDelete = `
       AND EXISTS (SELECT 1 FROM expenses WHERE id = $2 AND user_id = $3)
 `;
 
-// $1 = user_id | optional $2 = ceremony_id (appended dynamically)
+// $1 = user_id | optional $2 = event_id (appended dynamically)
 const summary = (ceremonyFilter: string) => `
     WITH expense_totals AS (
         SELECT
