@@ -6,6 +6,7 @@ import {
     CreatePaymentValidator,
     ListPaymentsValidator,
     PaymentsSummaryValidator,
+    UpdatePaymentValidator,
 } from './validation/payments.validations';
 import paymentsService from './payments.service';
 import { PAYMENT_TYPES } from './constants/payment-types';
@@ -54,6 +55,19 @@ export class PaymentsController {
         new ResponseHandler(req, res).success({
             message: 'Payment added successfully',
             code: StatusCodes.CREATED,
+            data,
+        });
+    };
+
+    update = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+        const userId = req.user?.id as string;
+        const { id: expenseId, paymentId } = req.params;
+        const body = req.body as UpdatePaymentValidator;
+        const data = await this.service.update(paymentId, expenseId, userId, body);
+
+        new ResponseHandler(req, res).success({
+            message: 'Payment updated successfully',
+            code: StatusCodes.OK,
             data,
         });
     };

@@ -9,7 +9,7 @@ import {
     updateExpenseValidator,
     listExpensesValidator,
 } from './validation/expenses.validations';
-import { createPaymentValidator } from '../payments/validation/payments.validations';
+import { createPaymentValidator, updatePaymentValidator } from '../payments/validation/payments.validations';
 
 const { validateRequest } = ValidationMiddleware;
 const router = Router();
@@ -42,6 +42,12 @@ router.post(
     '/:id/payments',
     validateRequest(createPaymentValidator),
     tryCatch(paymentsController.create),
+);
+
+router.patch(
+    '/:id/payments/:paymentId',
+    validateRequest(updatePaymentValidator),
+    tryCatch(paymentsController.update),
 );
 
 router.delete('/:id/payments/:paymentId', tryCatch(paymentsController.delete));

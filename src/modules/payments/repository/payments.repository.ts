@@ -1,9 +1,9 @@
 import { dbQuery } from '../../../config/database/helper/query.helpers';
 import { IPaymentsRepository, PaymentRow, PaymentSummary } from '../interface/payments.interface';
-import { CreatePaymentValidator, ListPaymentsValidator } from '../validation/payments.validations';
+import { CreatePaymentValidator, ListPaymentsValidator, UpdatePaymentValidator } from '../validation/payments.validations';
 import PaymentsQueries, { BASE_SELECT } from '../query/payments.queries';
 
-const { findById, create, softDelete, summary } = PaymentsQueries;
+const { findById, create, softDelete, summary, buildUpdate } = PaymentsQueries;
 
 export class PaymentsRepository implements IPaymentsRepository {
     async findAll(userId: string, filters: ListPaymentsValidator): Promise<{ rows: PaymentRow[]; total: number }> {
@@ -96,6 +96,28 @@ export class PaymentsRepository implements IPaymentsRepository {
         ]);
 
         return this.findById(id, expenseId, userId) as Promise<PaymentRow>;
+    }
+
+    async update(id: string, expenseId: string, userId: string, data: UpdatePaymentValidator): Promise<PaymentRow> {
+        const params: (string | number | null)[] = [id, expenseId, userId];
+        const fields: string[] = [];
+
+        const addField = (col: string, val: string | number | null | undefined) => {
+            if (val === undefined) return;
+            params.push(val);
+            fields.push(`${col} = $${params.length}`);
+        };
+
+        addField('payment_type',     data.payment_type ?? undefined);
+        addField('user_currency_id', data.user_currency_id ?? undefined);
+        addField('wallet_amount',    data.wallet_amount ?? undefined);
+        addField('exchange_rate',    data.exchange_rate !== undefined ? (data.exchange_rate ?? null) : undefined);
+        addField('base_amount',      data.base_amount ?? undefined);
+        addField('payment_date',     data.payment_date ?? undefined);
+        addField('notes',            data.notes !== undefined ? (data.notes ?? null) : undefined);
+
+        const { id: updatedId } = await dbQuery.one<{ id: string }>(buildUpdate(fields), params);
+        return this.findById(updatedId, expenseId, userId) as Promise<PaymentRow>;
     }
 
     async softDelete(id: string, expenseId: string, userId: string): Promise<void> {

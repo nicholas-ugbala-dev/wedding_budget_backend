@@ -23,6 +23,17 @@ export const paymentsSummaryValidator = z.object({
     ceremony_id: z.uuid().optional(),
 });
 
+export const updatePaymentValidator = z.object({
+    payment_type:     z.enum(PAYMENT_TYPE_VALUES).optional(),
+    user_currency_id: z.uuid().optional(),
+    wallet_amount:    z.number().int().positive().optional(),
+    exchange_rate:    z.number().int().positive().nullable().optional(),
+    base_amount:      z.number().int().positive().optional(),
+    payment_date:     z.string().min(1).optional(),
+    notes:            z.string().nullable().optional(),
+});
+
 export type CreatePaymentValidator = z.infer<typeof createPaymentValidator>;
+export type UpdatePaymentValidator = z.infer<typeof updatePaymentValidator>;
 export type ListPaymentsValidator = z.infer<typeof listPaymentsValidator>;
 export type PaymentsSummaryValidator = z.infer<typeof paymentsSummaryValidator>;

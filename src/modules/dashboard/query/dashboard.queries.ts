@@ -80,19 +80,19 @@ const getDashboard = `
             cer.name     AS ceremony_name,
             CASE
                 WHEN et.vendor_id IS NULL AND (et.actual_amount IS NULL OR et.actual_amount = 0)
-                    THEN 'Missing info'
+                    THEN 'missing_info'
                 WHEN et.vendor_id IS NULL
-                    THEN 'No vendor'
+                    THEN 'no_vendor'
                 WHEN et.is_planned = true
-                    THEN 'Unconfirmed'
+                    THEN 'unconfirmed'
                 WHEN et.refundable_amount > 0 AND et.is_refunded = false
-                    THEN 'Pending refund'
+                    THEN 'pending_refund'
                 WHEN et.total_paid = 0 AND et.actual_amount > 0
-                    THEN 'Unpaid'
+                    THEN 'unpaid'
                 WHEN et.actual_amount > et.total_paid
                     AND et.payment_deadline IS NOT NULL
                     AND et.payment_deadline < CURRENT_DATE
-                    THEN 'Balance due'
+                    THEN 'balance_due'
             END          AS badge
         FROM expense_totals et
         LEFT JOIN vendors    v   ON v.id   = et.vendor_id

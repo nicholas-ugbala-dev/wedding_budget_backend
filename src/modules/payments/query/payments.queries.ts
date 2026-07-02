@@ -57,5 +57,16 @@ const summary = (ceremonyFilter: string) => `
     FROM expense_totals
 `;
 
-const PaymentsQueries = { findById, create, softDelete, summary };
+// $1 = id | $2 = expense_id | $3 = user_id | returns updated row id
+const buildUpdate = (fields: string[]) => `
+    UPDATE payments p
+    SET ${fields.join(', ')}, updated_at = NOW()
+    WHERE p.id = $1
+      AND p.expense_id = $2
+      AND EXISTS (SELECT 1 FROM expenses WHERE id = $2 AND user_id = $3)
+      AND p.deleted_at IS NULL
+    RETURNING p.id
+`;
+
+const PaymentsQueries = { findById, create, softDelete, summary, buildUpdate };
 export default PaymentsQueries;

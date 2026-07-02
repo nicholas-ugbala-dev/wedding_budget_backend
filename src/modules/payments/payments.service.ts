@@ -1,6 +1,6 @@
 import { ApiError } from '../../utils/error';
 import { IPaymentsService, IPaymentsRepository, PaymentRow, PaymentSummary } from './interface/payments.interface';
-import { CreatePaymentValidator, ListPaymentsValidator } from './validation/payments.validations';
+import { CreatePaymentValidator, ListPaymentsValidator, UpdatePaymentValidator } from './validation/payments.validations';
 import { paginate, PaginatedResult } from '../../utils/helpers/pagination.helper';
 import paymentsRepository from './repository/payments.repository';
 import expensesRepository from '../expenses/repository/expenses.repository';
@@ -40,6 +40,26 @@ export class PaymentsService implements IPaymentsService {
         }
 
         return this.repository.create(expenseId, userId, data, resolvedBaseAmount, resolvedExchangeRate);
+    }
+
+    async update(id: string, expenseId: string, userId: string, data: UpdatePaymentValidator): Promise<PaymentRow> {
+        const expense = await expensesRepository.findRawById(expenseId, userId);
+        if (!expense) throw new ApiError(404, 'Expense not found');
+
+        const payment = await this.repository.findById(id, expenseId, userId);
+        if (!payment) throw new ApiError(404, 'Payment not found');
+
+        if (data.user_currency_id !== undefined && data.user_currency_id !== payment.user_currency_id) {
+            const userCurrency = await currenciesRepository.findById(userId, data.user_currency_id);
+            if (!userCurrency) throw new ApiError(404, 'Currency wallet not found');
+
+            const isSameCurrency = userCurrency.currency_code === expense.base_currency;
+            if (!isSameCurrency && !data.exchange_rate && !data.base_amount) {
+                throw new ApiError(400, 'exchange_rate and base_amount are required when switching to a foreign currency wallet');
+            }
+        }
+
+        return this.repository.update(id, expenseId, userId, data);
     }
 
     async delete(id: string, expenseId: string, userId: string): Promise<void> {
