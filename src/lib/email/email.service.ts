@@ -11,7 +11,7 @@ export const sendPasswordResetEmail = async (
 ): Promise<void> => {
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
-    const toEmail = process.env.NODE_ENV === 'development' ? 'kosinick01@gmail.com' : email;
+    const toEmail = process.env.RESEND_TEST_EMAIL ?? email;
 
     const { data, error } = await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL as string,
