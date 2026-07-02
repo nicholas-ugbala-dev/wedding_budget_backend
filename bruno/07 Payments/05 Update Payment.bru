@@ -1,0 +1,89 @@
+meta {
+  name: Update Payment
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{BASE_URL}}/expenses/{{EXPENSE_ID}}/payments/{{PAYMENT_ID}}
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{AUTH_TOKEN}}
+}
+
+body:json {
+  {
+    "payment_type": "full_payment",
+    "payment_date": "2026-07-01",
+    "notes": "Updated payment details"
+  }
+}
+
+example {
+  name: example
+
+  request: {
+    url: {{BASE_URL}}/expenses/{{EXPENSE_ID}}/payments/{{PAYMENT_ID}}
+    method: PATCH
+    mode: json
+    headers: {
+      Authorization: Bearer {{AUTH_TOKEN}}
+    }
+
+    body:json: {
+      {
+        "payment_type": "full_payment",
+        "payment_date": "2026-07-01",
+        "notes": "Updated payment details"
+      }
+    }
+  }
+
+  response: {
+    headers: {
+      x-powered-by: Express
+      access-control-allow-origin: http://localhost:5173
+      vary: Origin
+      access-control-allow-credentials: true
+      content-type: application/json; charset=utf-8
+      connection: keep-alive
+      keep-alive: timeout=5
+    }
+
+    status: {
+      code: 200
+      text: OK
+    }
+
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "message": "Payment updated successfully",
+          "url": "/api/v1/expenses/c0913dfe-bdac-4389-9f42-0c57f6523c71/payments/44d692dd-e1bf-4501-bc2b-39415ae8df50",
+          "data": {
+            "id": "44d692dd-e1bf-4501-bc2b-39415ae8df50",
+            "expense_id": "c0913dfe-bdac-4389-9f42-0c57f6523c71",
+            "expense_name": "Floral Arrangements",
+            "ceremony_id": "624f971d-2b31-4030-8549-14debc5a6039",
+            "ceremony_name": "Engagement Party",
+            "payment_type": "full_payment",
+            "user_currency_id": "d061f353-8cab-4d9d-aa8f-415b7a83ba72",
+            "wallet_currency_code": "NGN",
+            "wallet_amount": "10000000",
+            "exchange_rate": null,
+            "base_amount": "10000000",
+            "payment_date": "2026-07-01T00:00:00.000Z",
+            "notes": "Updated payment details",
+            "created_at": "2026-06-30T12:47:20.535Z",
+            "updated_at": "2026-07-01T09:00:00.000Z"
+          }
+        }
+      '''
+    }
+  }
+}
