@@ -10,7 +10,7 @@ const {
     findByEmail,
     findById,
     updateOnboarding,
-    bulkInsertCeremonies,
+    bulkInsertEvents,
     bulkInsertCurrencies,
     createResetToken,
     findResetToken,
@@ -56,10 +56,10 @@ export class AuthRepository implements IAuthRepository {
         return result;
     }
 
-    async saveOnboardingCeremonies(userId: string, ceremonies: string[]): Promise<void> {
-        await dbQuery.manyOrNone(bulkInsertCeremonies(ceremonies.length), [
+    async saveOnboardingEvents(userId: string, events: string[]): Promise<void> {
+        await dbQuery.manyOrNone(bulkInsertEvents(events.length), [
             userId,
-            ...ceremonies,
+            ...events,
         ]);
     }
 

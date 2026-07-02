@@ -1,11 +1,11 @@
-// $1 = user_id  $2 = ceremony_id (uuid | null — null means all ceremonies)
+// $1 = user_id  $2 = event_id (uuid | null — null means all ceremonies)
 const getDashboard = `
     WITH
     filtered_expenses AS MATERIALIZED (
         SELECT
             e.id,
             e.name,
-            e.ceremony_id,
+            e.event_id,
             e.category_id,
             e.vendor_id,
             e.actual_amount,
@@ -16,7 +16,7 @@ const getDashboard = `
             e.payment_deadline
         FROM expenses e
         WHERE e.user_id = $1
-          AND ($2::uuid IS NULL OR e.ceremony_id = $2::uuid)
+          AND ($2::uuid IS NULL OR e.event_id = $2::uuid)
     ),
     expense_totals AS (
         SELECT
@@ -25,7 +25,7 @@ const getDashboard = `
         FROM filtered_expenses fe
         LEFT JOIN payments p ON p.expense_id = fe.id
         GROUP BY
-            fe.id, fe.name, fe.ceremony_id, fe.category_id,
+            fe.id, fe.name, fe.event_id, fe.category_id,
             fe.vendor_id, fe.actual_amount, fe.planned_amount,
             fe.refundable_amount, fe.is_refunded, fe.is_planned, fe.payment_deadline
     ),
@@ -77,7 +77,7 @@ const getDashboard = `
             et.id        AS expense_id,
             et.name,
             v.name       AS vendor_name,
-            cer.name     AS ceremony_name,
+            ev.name      AS event_name,
             CASE
                 WHEN et.vendor_id IS NULL AND (et.actual_amount IS NULL OR et.actual_amount = 0)
                     THEN 'missing_info'
@@ -96,7 +96,7 @@ const getDashboard = `
             END          AS badge
         FROM expense_totals et
         LEFT JOIN vendors    v   ON v.id   = et.vendor_id
-        LEFT JOIN ceremonies cer ON cer.id = et.ceremony_id
+        LEFT JOIN events     ev  ON ev.id  = et.event_id
         WHERE
             et.vendor_id IS NULL
             OR et.is_planned = true

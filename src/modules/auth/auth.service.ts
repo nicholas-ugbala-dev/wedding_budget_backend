@@ -4,7 +4,7 @@ import {
     RegisterValidator,
     LoginValidator,
     OnboardingValidator,
-    OnboardingCeremoniesValidator,
+    OnboardingEventsValidator,
     OnboardingCurrenciesValidator,
 } from "./validation/auth.validations";
 import { IAuthService, IAuthRepository, AuthResponse } from "./interface/auth.interface";
@@ -67,8 +67,8 @@ export class AuthService implements IAuthService {
         return this.authRepository.updateOnboarding(userId, data);
     }
 
-    async saveOnboardingCeremonies(userId: string, data: OnboardingCeremoniesValidator): Promise<void> {
-        await this.authRepository.saveOnboardingCeremonies(userId, data.ceremonies);
+    async saveOnboardingEvents(userId: string, data: OnboardingEventsValidator): Promise<void> {
+        await this.authRepository.saveOnboardingEvents(userId, data.events);
     }
 
     async saveOnboardingCurrencies(userId: string, data: OnboardingCurrenciesValidator): Promise<void> {

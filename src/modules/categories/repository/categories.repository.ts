@@ -4,27 +4,27 @@ import { ICategoriesRepository } from '../interface/categories.interface';
 import { CreateCategoryValidator, UpdateCategoryValidator } from '../validation/categories.validations';
 import CategoriesQueries from '../query/categories.queries';
 
-const { findAll, findById, findByNameAndCeremony, create, update, remove } = CategoriesQueries;
+const { findAll, findById, findByNameAndEvent, create, update, remove } = CategoriesQueries;
 
 export class CategoriesRepository implements ICategoriesRepository {
-    async findAll(userId: string, ceremonyId?: string): Promise<Category[]> {
-        return (await dbQuery.manyOrNone<Category>(findAll, [userId, ceremonyId ?? null])) ?? [];
+    async findAll(userId: string, eventId?: string): Promise<Category[]> {
+        return (await dbQuery.manyOrNone<Category>(findAll, [userId, eventId ?? null])) ?? [];
     }
 
     async findById(id: string, userId: string): Promise<Category | null> {
         return dbQuery.oneOrNone<Category>(findById, [id, userId]);
     }
 
-    async findByNameAndCeremony(userId: string, name: string, ceremonyId: string): Promise<Category | null> {
-        return dbQuery.oneOrNone<Category>(findByNameAndCeremony, [userId, name, ceremonyId]);
+    async findByNameAndEvent(userId: string, name: string, eventId: string): Promise<Category | null> {
+        return dbQuery.oneOrNone<Category>(findByNameAndEvent, [userId, name, eventId]);
     }
 
     async create(userId: string, data: CreateCategoryValidator): Promise<Category> {
-        return dbQuery.one<Category>(create, [userId, data.ceremony_id, data.name]);
+        return dbQuery.one<Category>(create, [userId, data.event_id, data.name]);
     }
 
     async findOrCreate(userId: string, data: CreateCategoryValidator): Promise<Category> {
-        const existing = await this.findByNameAndCeremony(userId, data.name, data.ceremony_id);
+        const existing = await this.findByNameAndEvent(userId, data.name, data.event_id);
         if (existing) return existing;
         return this.create(userId, data);
     }
@@ -32,7 +32,7 @@ export class CategoriesRepository implements ICategoriesRepository {
     async update(id: string, userId: string, data: UpdateCategoryValidator): Promise<Category> {
         return dbQuery.one<Category>(update, [
             data.name ?? null,
-            data.ceremony_id ?? null,
+            data.event_id ?? null,
             id,
             userId,
         ]);

@@ -3,7 +3,7 @@ export interface Expense {
     user_id: string;
     category_id: string;
     vendor_id: string | null;
-    ceremony_id: string;
+    event_id: string;
     name: string;
     planned_amount: number | null;
     actual_amount: number | null;

@@ -10,9 +10,9 @@ export class PaymentsRepository implements IPaymentsRepository {
         const params: (string | number | null)[] = [userId];
         const where: string[] = ['e.user_id = $1', 'p.deleted_at IS NULL'];
 
-        if (filters.ceremony_id) {
-            params.push(filters.ceremony_id);
-            where.push(`e.ceremony_id = $${params.length}::uuid`);
+        if (filters.event_id) {
+            params.push(filters.event_id);
+            where.push(`e.event_id = $${params.length}::uuid`);
         }
 
         if (filters.expense_id) {
@@ -51,12 +51,12 @@ export class PaymentsRepository implements IPaymentsRepository {
         return dbQuery.oneOrNone<PaymentRow>(findById, [id, expenseId, userId]);
     }
 
-    async getSummary(userId: string, ceremonyId?: string): Promise<PaymentSummary> {
+    async getSummary(userId: string, eventId?: string): Promise<PaymentSummary> {
         const params: (string | null)[] = [userId];
-        let ceremonyFilter = '';
-        if (ceremonyId) {
-            params.push(ceremonyId);
-            ceremonyFilter = `AND e.ceremony_id = $${params.length}::uuid`;
+        let eventFilter = '';
+        if (eventId) {
+            params.push(eventId);
+            eventFilter = `AND e.event_id = $${params.length}::uuid`;
         }
 
         type RawRow = {
@@ -66,7 +66,7 @@ export class PaymentsRepository implements IPaymentsRepository {
             total_expenses: number;
         };
 
-        const row = await dbQuery.oneOrNone<RawRow>(summary(ceremonyFilter), params);
+        const row = await dbQuery.oneOrNone<RawRow>(summary(eventFilter), params);
         if (!row) return { total_paid: 0, outstanding: 0, fully_paid_count: 0, total_expenses: 0 };
 
         return {

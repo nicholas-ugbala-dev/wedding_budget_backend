@@ -5,7 +5,7 @@ import { paginate, PaginatedResult } from '../../utils/helpers/pagination.helper
 import expensesRepository from './repository/expenses.repository';
 import vendorsRepository from '../vendors/repository/vendors.repository';
 import categoriesRepository from '../categories/repository/categories.repository';
-import ceremoniesRepository from '../ceremonies/repository/ceremonies.repository';
+import eventsRepository from '../events/repository/events.repository';
 import currenciesRepository from '../currencies/repository/currencies.repository';
 
 export class ExpensesService implements IExpensesService {
@@ -24,8 +24,8 @@ export class ExpensesService implements IExpensesService {
 
     async create(userId: string, data: CreateExpenseValidator): Promise<ExpenseRow> {
         // Validate ceremony belongs to user
-        const ceremony = await ceremoniesRepository.findById(data.ceremony_id, userId);
-        if (!ceremony) throw new ApiError(404, 'Ceremony not found');
+        const event = await eventsRepository.findById(data.event_id, userId);
+        if (!event) throw new ApiError(404, 'Event not found');
 
         // Validate base_currency is in user's configured currencies (if explicitly provided)
         if (data.base_currency) {
@@ -42,7 +42,7 @@ export class ExpensesService implements IExpensesService {
         } else {
             const cat = await categoriesRepository.findOrCreate(userId, {
                 name: data.category_name!,
-                ceremony_id: data.ceremony_id,
+                event_id: data.event_id,
             });
             categoryId = cat.id;
         }
@@ -70,9 +70,9 @@ export class ExpensesService implements IExpensesService {
         if (!existing) throw new ApiError(404, 'Expense not found');
 
         // Validate new ceremony belongs to user if changing it
-        if (data.ceremony_id) {
-            const ceremony = await ceremoniesRepository.findById(data.ceremony_id, userId);
-            if (!ceremony) throw new ApiError(404, 'Ceremony not found');
+        if (data.event_id) {
+            const event = await eventsRepository.findById(data.event_id, userId);
+            if (!event) throw new ApiError(404, 'Event not found');
         }
 
         return this.repository.update(id, userId, data, existing);

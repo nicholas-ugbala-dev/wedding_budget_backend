@@ -7,7 +7,7 @@ import {
   RegisterValidator,
   LoginValidator,
   OnboardingValidator,
-  OnboardingCeremoniesValidator,
+  OnboardingEventsValidator,
   OnboardingCurrenciesValidator,
   ForgotPasswordValidator,
   ResetPasswordValidator,
@@ -83,15 +83,15 @@ export class AuthController {
     });
   }
 
-  saveOnboardingCeremonies = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+  saveOnboardingEvents = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
     const userId = req.user?.id as string;
-    const data = req.body as OnboardingCeremoniesValidator;
+    const data = req.body as OnboardingEventsValidator;
 
-    await this.authService.saveOnboardingCeremonies(userId, data);
+    await this.authService.saveOnboardingEvents(userId, data);
 
     const response = new ResponseHandler(req, res);
     response.success({
-      message: "Ceremonies saved successfully",
+      message: "Events saved successfully",
       code: StatusCodes.OK,
     });
   };

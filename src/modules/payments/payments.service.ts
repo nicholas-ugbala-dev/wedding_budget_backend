@@ -14,8 +14,8 @@ export class PaymentsService implements IPaymentsService {
         return paginate(rows, filters.page, filters.limit, total);
     }
 
-    async summary(userId: string, ceremonyId?: string): Promise<PaymentSummary> {
-        return this.repository.getSummary(userId, ceremonyId);
+    async summary(userId: string, eventId?: string): Promise<PaymentSummary> {
+        return this.repository.getSummary(userId, eventId);
     }
 
     async create(expenseId: string, userId: string, data: CreatePaymentValidator): Promise<PaymentRow> {

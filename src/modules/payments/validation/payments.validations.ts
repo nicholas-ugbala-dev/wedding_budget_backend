@@ -13,14 +13,14 @@ export const createPaymentValidator = z.object({
 });
 
 export const listPaymentsValidator = z.object({
-    ceremony_id: z.uuid().optional(),
+    event_id: z.uuid().optional(),
     expense_id: z.uuid().optional(),
     page: z.coerce.number().int().min(1).default(1),
     limit: z.coerce.number().int().min(1).max(100).default(10),
 });
 
 export const paymentsSummaryValidator = z.object({
-    ceremony_id: z.uuid().optional(),
+    event_id: z.uuid().optional(),
 });
 
 export const updatePaymentValidator = z.object({

@@ -20,8 +20,8 @@ export const onboardingValidator = z.object({
     wedding_location: z.string().min(1, "Wedding location is required"),
 });
 
-export const onboardingCeremoniesValidator = z.object({
-    ceremonies: z.array(z.string().min(1)).min(1, "At least one ceremony is required"),
+export const onboardingEventsValidator = z.object({
+    events: z.array(z.string().min(1)).min(1, "At least one event is required"),
 });
 
 export const onboardingCurrenciesValidator = z.object({
@@ -41,7 +41,7 @@ export const resetPasswordValidator = z.object({
 export type RegisterValidator = z.infer<typeof registerValidator>;
 export type LoginValidator = z.infer<typeof loginValidator>;
 export type OnboardingValidator = z.infer<typeof onboardingValidator>;
-export type OnboardingCeremoniesValidator = z.infer<typeof onboardingCeremoniesValidator>;
+export type OnboardingEventsValidator = z.infer<typeof onboardingEventsValidator>;
 export type OnboardingCurrenciesValidator = z.infer<typeof onboardingCurrenciesValidator>;
 export type ForgotPasswordValidator = z.infer<typeof forgotPasswordValidator>;
 export type ResetPasswordValidator = z.infer<typeof resetPasswordValidator>;
