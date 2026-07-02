@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { success, ZodError } from 'zod';
 import { StatusCodes } from 'http-status-codes';
+import { logger } from '../../lib/logger';
 
 
 export class ApiError extends Error {
@@ -50,7 +51,7 @@ export class ApiError extends Error {
         res: Response,
         _next: NextFunction
     ): void {
-        console.error('Unhandled error:', err);
+        logger.error('Unhandled error', { error: err instanceof Error ? err.message : err });
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: 'An error occurred, we are looking into it.',
