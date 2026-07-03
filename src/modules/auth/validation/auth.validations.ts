@@ -14,10 +14,10 @@ export const loginValidator = z.object({
 });
 
 export const onboardingValidator = z.object({
-    base_currency: z.string().length(3, "Currency must be a 3-letter code").toUpperCase(),
-    event_name: z.string().min(1, "Event name is required"),
-    event_date: z.iso.date("Invalid date format"),
-    wedding_location: z.string().min(1, "Wedding location is required"),
+    base_currency:    z.string().length(3, "Currency must be a 3-letter code").toUpperCase(),
+    event_name:       z.string().min(1).optional(),
+    event_date:       z.iso.date("Invalid date format").optional(),
+    wedding_location: z.string().min(1).optional(),
 });
 
 export const onboardingEventsValidator = z.object({
