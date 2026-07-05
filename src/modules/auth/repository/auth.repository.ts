@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import AuthQueries from "../query/auth.queries";
 import { User, SafeUser } from "../../../config/database/models";
-import { RegisterValidator, OnboardingValidator } from "../validation/auth.validations";
+import { RegisterValidator, OnboardingValidator, UpdateProfileValidator } from "../validation/auth.validations";
 import { IAuthRepository, ResetTokenRow } from "../interface/auth.interface";
 import { dbQuery } from "../../../config/database/helper/query.helpers";
 
@@ -10,6 +10,7 @@ const {
     findByEmail,
     findById,
     updateOnboarding,
+    updateProfile,
     bulkInsertEvents,
     bulkInsertCurrencies,
     createResetToken,
@@ -44,15 +45,7 @@ export class AuthRepository implements IAuthRepository {
     }
 
     async updateOnboarding(userId: string, data: OnboardingValidator): Promise<SafeUser> {
-        const { base_currency, event_name, event_date, wedding_location } = data;
-        const result: SafeUser = await dbQuery.one(updateOnboarding, [
-            base_currency,
-            event_name,
-            event_date,
-            wedding_location,
-            userId,
-        ]);
-
+        const result: SafeUser = await dbQuery.one(updateOnboarding, [data.base_currency, userId]);
         return result;
     }
 
@@ -88,6 +81,14 @@ export class AuthRepository implements IAuthRepository {
 
     async updatePassword(userId: string, hashedPassword: string): Promise<void> {
         await dbQuery.one(updatePassword, [hashedPassword, userId]);
+    }
+
+    async updateProfile(userId: string, data: UpdateProfileValidator): Promise<SafeUser> {
+        return dbQuery.one<SafeUser>(updateProfile, [
+            data.first_name ?? null,
+            data.last_name  ?? null,
+            userId,
+        ]);
     }
 }
 

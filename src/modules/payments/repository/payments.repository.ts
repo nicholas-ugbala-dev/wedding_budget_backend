@@ -2,6 +2,7 @@ import { dbQuery } from '../../../config/database/helper/query.helpers';
 import { IPaymentsRepository, PaymentRow, PaymentSummary } from '../interface/payments.interface';
 import { CreatePaymentValidator, ListPaymentsValidator, UpdatePaymentValidator } from '../validation/payments.validations';
 import PaymentsQueries, { BASE_SELECT } from '../query/payments.queries';
+import { toRateInt } from '../../../utils/money';
 
 const { findById, create, softDelete, summary, buildUpdate } = PaymentsQueries;
 
@@ -13,6 +14,11 @@ export class PaymentsRepository implements IPaymentsRepository {
         if (filters.event_id) {
             params.push(filters.event_id);
             where.push(`e.event_id = $${params.length}::uuid`);
+        }
+
+        if (filters.client_id) {
+            params.push(filters.client_id);
+            where.push(`ev.client_id = $${params.length}::uuid`);
         }
 
         if (filters.expense_id) {
@@ -51,12 +57,17 @@ export class PaymentsRepository implements IPaymentsRepository {
         return dbQuery.oneOrNone<PaymentRow>(findById, [id, expenseId, userId]);
     }
 
-    async getSummary(userId: string, eventId?: string): Promise<PaymentSummary> {
+    async getSummary(userId: string, eventId?: string, clientId?: string): Promise<PaymentSummary> {
         const params: (string | null)[] = [userId];
-        let eventFilter = '';
+        const filters: string[] = [];
+
         if (eventId) {
             params.push(eventId);
-            eventFilter = `AND e.event_id = $${params.length}::uuid`;
+            filters.push(`AND e.event_id = $${params.length}::uuid`);
+        }
+        if (clientId) {
+            params.push(clientId);
+            filters.push(`AND ev.client_id = $${params.length}::uuid`);
         }
 
         type RawRow = {
@@ -66,7 +77,7 @@ export class PaymentsRepository implements IPaymentsRepository {
             total_expenses: number;
         };
 
-        const row = await dbQuery.oneOrNone<RawRow>(summary(eventFilter), params);
+        const row = await dbQuery.oneOrNone<RawRow>(summary(filters.join(' ')), params);
         if (!row) return { total_paid: 0, outstanding: 0, fully_paid_count: 0, total_expenses: 0 };
 
         return {
@@ -81,24 +92,30 @@ export class PaymentsRepository implements IPaymentsRepository {
         expenseId: string,
         userId: string,
         data: CreatePaymentValidator,
+        walletCurrencyCode: string,
         resolvedBaseAmount: number,
         resolvedExchangeRate: number | null,
+        reportingCurrencyCode: string | null,
+        reportingAmount: number | null,
     ): Promise<PaymentRow> {
         const { id } = await dbQuery.one<{ id: string }>(create, [
             expenseId,
             data.payment_type,
-            data.user_currency_id,
+            data.user_currency_id ?? null,
+            walletCurrencyCode,
             data.wallet_amount,
-            resolvedExchangeRate,
+            resolvedExchangeRate != null ? toRateInt(resolvedExchangeRate) : null,
             resolvedBaseAmount,
             data.payment_date,
             data.notes ?? null,
+            reportingCurrencyCode,
+            reportingAmount,
         ]);
 
         return this.findById(id, expenseId, userId) as Promise<PaymentRow>;
     }
 
-    async update(id: string, expenseId: string, userId: string, data: UpdatePaymentValidator): Promise<PaymentRow> {
+    async update(id: string, expenseId: string, userId: string, data: UpdatePaymentValidator, walletCurrencyCode?: string, reportingCurrencyCode?: string | null, reportingAmount?: number | null): Promise<PaymentRow> {
         const params: (string | number | null)[] = [id, expenseId, userId];
         const fields: string[] = [];
 
@@ -108,13 +125,25 @@ export class PaymentsRepository implements IPaymentsRepository {
             fields.push(`${col} = $${params.length}`);
         };
 
-        addField('payment_type',     data.payment_type ?? undefined);
-        addField('user_currency_id', data.user_currency_id ?? undefined);
-        addField('wallet_amount',    data.wallet_amount ?? undefined);
-        addField('exchange_rate',    data.exchange_rate !== undefined ? (data.exchange_rate ?? null) : undefined);
-        addField('base_amount',      data.base_amount ?? undefined);
-        addField('payment_date',     data.payment_date ?? undefined);
-        addField('notes',            data.notes !== undefined ? (data.notes ?? null) : undefined);
+        addField('payment_type', data.payment_type ?? undefined);
+
+        if (data.wallet_currency_code !== undefined) {
+            // Planner flow: store code directly, clear user_currency_id
+            addField('wallet_currency_code', data.wallet_currency_code);
+            addField('user_currency_id', null);
+        } else if (data.user_currency_id !== undefined) {
+            // Couple flow: set user_currency_id and derived code
+            addField('user_currency_id', data.user_currency_id ?? undefined);
+            if (walletCurrencyCode) addField('wallet_currency_code', walletCurrencyCode);
+        }
+
+        addField('wallet_amount', data.wallet_amount ?? undefined);
+        addField('exchange_rate', data.exchange_rate !== undefined ? (data.exchange_rate != null ? toRateInt(data.exchange_rate) : null) : undefined);
+        addField('base_amount', data.base_amount ?? undefined);
+        addField('payment_date', data.payment_date ?? undefined);
+        addField('notes', data.notes !== undefined ? (data.notes ?? null) : undefined);
+        if (reportingCurrencyCode !== undefined) addField('reporting_currency_code', reportingCurrencyCode);
+        if (reportingAmount !== undefined) addField('reporting_amount', reportingAmount);
 
         const { id: updatedId } = await dbQuery.one<{ id: string }>(buildUpdate(fields), params);
         return this.findById(updatedId, expenseId, userId) as Promise<PaymentRow>;

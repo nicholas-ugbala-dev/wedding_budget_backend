@@ -17,6 +17,11 @@ export class ExpensesRepository implements IExpensesRepository {
             where.push(`e.event_id = $${params.length}::uuid`);
         }
 
+        if (filters.client_id) {
+            params.push(filters.client_id);
+            where.push(`ev.client_id = $${params.length}::uuid`);
+        }
+
         if (filters.search) {
             params.push(`%${filters.search}%`);
             where.push(`(e.name ILIKE $${params.length} OR v.name ILIKE $${params.length})`);
@@ -35,7 +40,7 @@ export class ExpensesRepository implements IExpensesRepository {
         const innerSQL = `
             ${BASE_SELECT}
             WHERE ${where.join(' AND ')}
-            GROUP BY e.id, ev.name, c.name, v.name
+            GROUP BY e.id, ev.name, ev.client_id, c.name, v.name
             ${having.length ? `HAVING ${having.join(' AND ')}` : ''}
             ORDER BY e.created_at DESC
         `;
@@ -74,6 +79,8 @@ export class ExpensesRepository implements IExpensesRepository {
         data: CreateExpenseValidator,
         resolvedCategoryId: string,
         resolvedVendorId: string | null,
+        reportingCurrencyCode: string | null,
+        reportingAmount: number | null,
     ): Promise<ExpenseRow> {
         const { id } = await dbQuery.one<{ id: string }>(create, [
             userId,
@@ -88,6 +95,8 @@ export class ExpensesRepository implements IExpensesRepository {
             data.is_planned ?? false,
             data.payment_deadline ?? null,
             data.notes ?? null,
+            reportingCurrencyCode,
+            reportingAmount,
         ]);
 
         return this.findRawById(id, userId) as Promise<ExpenseRow>;
@@ -98,6 +107,8 @@ export class ExpensesRepository implements IExpensesRepository {
         userId: string,
         data: UpdateExpenseValidator,
         existing: ExpenseRow,
+        reportingCurrencyCode: string | null | undefined,
+        reportingAmount: number | null | undefined,
     ): Promise<ExpenseRow> {
         const isRefunded = data.is_refunded ?? existing.is_refunded;
         const wasRefunded = existing.is_refunded;
@@ -121,6 +132,8 @@ export class ExpensesRepository implements IExpensesRepository {
             isRefunded,
             refundedAt ? refundedAt.toISOString() : null,
             'payment_deadline' in data    ? (data.payment_deadline ?? null) : (existing.payment_deadline ? existing.payment_deadline.toISOString().split('T')[0] : null),
+            reportingCurrencyCode !== undefined ? reportingCurrencyCode : existing.reporting_currency_code,
+            reportingAmount !== undefined ? reportingAmount : existing.reporting_amount,
             id,
             userId,
         ]);

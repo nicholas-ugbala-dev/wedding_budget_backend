@@ -6,6 +6,7 @@ import {
     OnboardingValidator,
     OnboardingEventsValidator,
     OnboardingCurrenciesValidator,
+    UpdateProfileValidator,
 } from "./validation/auth.validations";
 import { IAuthService, IAuthRepository, AuthResponse } from "./interface/auth.interface";
 import authRepository from "./repository/auth.repository";
@@ -96,6 +97,10 @@ export class AuthService implements IAuthService {
 
         await this.authRepository.updatePassword(resetToken.user_id, hashedPassword);
         await this.authRepository.deleteResetToken(token);
+    }
+
+    async updateProfile(userId: string, data: UpdateProfileValidator) {
+        return this.authRepository.updateProfile(userId, data);
     }
 }
 

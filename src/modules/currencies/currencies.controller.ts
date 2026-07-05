@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { ResponseHandler } from '../../utils/helpers/response.handler';
 import { ICurrenciesService } from './interface/currencies.interface';
-import { AddCurrencyValidator } from './validation/currencies.validations';
+import { AddCurrencyValidator, listCurrenciesValidator } from './validation/currencies.validations';
 import currenciesService from './currencies.service';
 
 export class CurrenciesController {
@@ -10,7 +10,11 @@ export class CurrenciesController {
 
     list = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
         const userId = req.user?.id as string;
-        const data = await this.service.list(userId);
+        const { client_id } = listCurrenciesValidator.parse(req.query);
+
+        const data = client_id
+            ? await this.service.listForClient(userId, client_id)
+            : await this.service.list(userId);
 
         new ResponseHandler(req, res).success({
             message: 'Currencies fetched successfully',

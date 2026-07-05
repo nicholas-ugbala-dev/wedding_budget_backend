@@ -1,6 +1,13 @@
-// $1 = user_id  $2 = event_id (uuid | null — null means all ceremonies)
+// $1 = user_id  $2 = event_id (uuid | null)  $3 = client_id (uuid | null)
 const getDashboard = `
     WITH
+    event_budgets AS (
+        SELECT COALESCE(SUM(ev.budget), 0) AS total_budget
+        FROM events ev
+        WHERE ev.user_id = $1
+          AND ($2::uuid IS NULL OR ev.id = $2::uuid)
+          AND ($3::uuid IS NULL OR ev.client_id = $3::uuid)
+    ),
     filtered_expenses AS MATERIALIZED (
         SELECT
             e.id,
@@ -9,50 +16,63 @@ const getDashboard = `
             e.category_id,
             e.vendor_id,
             e.actual_amount,
+            e.reporting_amount,
             e.planned_amount,
             e.refundable_amount,
             e.is_refunded,
             e.is_planned,
             e.payment_deadline
         FROM expenses e
+        LEFT JOIN events ev ON ev.id = e.event_id
         WHERE e.user_id = $1
           AND ($2::uuid IS NULL OR e.event_id = $2::uuid)
+          AND ($3::uuid IS NULL OR ev.client_id = $3::uuid)
     ),
     expense_totals AS (
         SELECT
             fe.*,
-            COALESCE(SUM(p.base_amount) FILTER (WHERE p.deleted_at IS NULL), 0) AS total_paid
+            COALESCE(fe.reporting_amount, fe.actual_amount)                                                    AS reporting_actual,
+            COALESCE(SUM(COALESCE(p.reporting_amount, p.base_amount)) FILTER (WHERE p.deleted_at IS NULL), 0) AS total_paid
         FROM filtered_expenses fe
         LEFT JOIN payments p ON p.expense_id = fe.id
         GROUP BY
             fe.id, fe.name, fe.event_id, fe.category_id,
-            fe.vendor_id, fe.actual_amount, fe.planned_amount,
+            fe.vendor_id, fe.actual_amount, fe.reporting_amount, fe.planned_amount,
             fe.refundable_amount, fe.is_refunded, fe.is_planned, fe.payment_deadline
     ),
     kpis AS (
         SELECT
-            COALESCE(SUM(COALESCE(planned_amount, actual_amount)), 0)             AS total_budget,
-            COALESCE(SUM(actual_amount)  FILTER (WHERE is_planned = false), 0)   AS actual_committed,
-            COALESCE(SUM(total_paid), 0)                                          AS total_paid,
+            (SELECT total_budget FROM event_budgets)                                               AS total_budget,
+            COALESCE(SUM(reporting_actual) FILTER (WHERE is_planned = false), 0)                  AS actual_committed,
+            COALESCE(SUM(total_paid), 0)                                                          AS total_paid,
             GREATEST(0,
-                COALESCE(SUM(actual_amount) FILTER (WHERE is_planned = false), 0)
+                COALESCE(SUM(reporting_actual) FILTER (WHERE is_planned = false), 0)
                 - COALESCE(SUM(total_paid), 0)
-            )                                                                     AS outstanding,
+            )                                                                                     AS outstanding,
             GREATEST(0,
-                COALESCE(SUM(actual_amount) FILTER (WHERE is_planned = false), 0)
-                - COALESCE(SUM(COALESCE(planned_amount, actual_amount)), 0)
-            )                                                                     AS over_budget_amount,
-            COALESCE(SUM(refundable_amount) FILTER (WHERE is_refunded = false AND refundable_amount > 0), 0) AS pending_refunds
+                COALESCE(SUM(reporting_actual) FILTER (WHERE is_planned = false), 0)
+                - (SELECT total_budget FROM event_budgets)
+            )                                                                                     AS over_budget_amount,
+            COALESCE(SUM(
+                CASE
+                    WHEN is_refunded = false AND refundable_amount > 0 AND actual_amount > 0 AND reporting_amount IS NOT NULL
+                        THEN ROUND(refundable_amount::float8 * reporting_amount / actual_amount)
+                    WHEN is_refunded = false AND refundable_amount > 0
+                        THEN refundable_amount
+                    ELSE 0
+                END
+            ), 0)                                                                                             AS pending_refunds
         FROM expense_totals
     ),
     by_category AS (
         SELECT
             c.name                                AS category,
-            SUM(et.actual_amount)                 AS actual_amount,
+            SUM(et.reporting_actual)              AS actual_amount,
+            SUM(et.planned_amount)                AS planned_amount,
             SUM(et.total_paid)                    AS total_paid,
             ROUND(
-                SUM(et.actual_amount) * 100.0
-                / NULLIF(SUM(SUM(et.actual_amount)) OVER (), 0),
+                SUM(et.reporting_actual) * 100.0
+                / NULLIF(SUM(SUM(et.reporting_actual)) OVER (), 0),
                 1
             )                                     AS pct
         FROM expense_totals et
@@ -61,15 +81,15 @@ const getDashboard = `
     ),
     payment_progress AS (
         SELECT
-            id                                                      AS expense_id,
+            id                                                          AS expense_id,
             name,
-            actual_amount,
+            reporting_actual                                            AS actual_amount,
             total_paid,
-            GREATEST(0, actual_amount - total_paid)                 AS balance,
+            GREATEST(0, reporting_actual - total_paid)                  AS balance,
             CASE
-                WHEN actual_amount = 0 THEN 0
-                ELSE ROUND(total_paid * 100.0 / actual_amount, 0)
-            END                                                     AS pct
+                WHEN reporting_actual = 0 THEN 0
+                ELSE ROUND(total_paid * 100.0 / reporting_actual, 0)
+            END                                                         AS pct
         FROM expense_totals
     ),
     needs_attention AS (
@@ -87,9 +107,9 @@ const getDashboard = `
                     THEN 'unconfirmed'
                 WHEN et.refundable_amount > 0 AND et.is_refunded = false
                     THEN 'pending_refund'
-                WHEN et.total_paid = 0 AND et.actual_amount > 0
+                WHEN et.total_paid = 0 AND et.reporting_actual > 0
                     THEN 'unpaid'
-                WHEN et.actual_amount > et.total_paid
+                WHEN et.reporting_actual > et.total_paid
                     AND et.payment_deadline IS NOT NULL
                     AND et.payment_deadline < CURRENT_DATE
                     THEN 'balance_due'
@@ -101,7 +121,7 @@ const getDashboard = `
             et.vendor_id IS NULL
             OR et.is_planned = true
             OR (et.refundable_amount > 0 AND et.is_refunded = false)
-            OR et.total_paid < et.actual_amount
+            OR et.total_paid < et.reporting_actual
         LIMIT 15
     )
     SELECT

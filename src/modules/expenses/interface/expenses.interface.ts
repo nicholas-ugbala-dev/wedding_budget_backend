@@ -10,6 +10,7 @@ export interface ExpenseRow {
     name: string;
     event_id: string;
     event_name: string;
+    client_id: string | null;
     category_id: string;
     category_name: string;
     vendor_id: string | null;
@@ -17,6 +18,8 @@ export interface ExpenseRow {
     planned_amount: number | null;
     actual_amount: number | null;
     base_currency: string;
+    reporting_currency_code: string | null;
+    reporting_amount: number | null;
     refundable_amount: number;
     is_refunded: boolean;
     refunded_at: Date | null;
@@ -43,8 +46,10 @@ export interface IExpensesRepository {
         data: CreateExpenseValidator,
         resolvedCategoryId: string,
         resolvedVendorId: string | null,
+        reportingCurrencyCode: string | null,
+        reportingAmount: number | null,
     ): Promise<ExpenseRow>;
-    update(id: string, userId: string, data: UpdateExpenseValidator, existing: ExpenseRow): Promise<ExpenseRow>;
+    update(id: string, userId: string, data: UpdateExpenseValidator, existing: ExpenseRow, reportingCurrencyCode: string | null | undefined, reportingAmount: number | null | undefined): Promise<ExpenseRow>;
     delete(id: string, userId: string): Promise<void>;
 }
 

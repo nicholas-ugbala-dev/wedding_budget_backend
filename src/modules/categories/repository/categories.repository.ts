@@ -4,38 +4,33 @@ import { ICategoriesRepository } from '../interface/categories.interface';
 import { CreateCategoryValidator, UpdateCategoryValidator } from '../validation/categories.validations';
 import CategoriesQueries from '../query/categories.queries';
 
-const { findAll, findById, findByNameAndEvent, create, update, remove } = CategoriesQueries;
+const { findAll, findById, findByName, create, update, remove } = CategoriesQueries;
 
 export class CategoriesRepository implements ICategoriesRepository {
-    async findAll(userId: string, eventId?: string): Promise<Category[]> {
-        return (await dbQuery.manyOrNone<Category>(findAll, [userId, eventId ?? null])) ?? [];
+    async findAll(userId: string): Promise<Category[]> {
+        return (await dbQuery.manyOrNone<Category>(findAll, [userId])) ?? [];
     }
 
     async findById(id: string, userId: string): Promise<Category | null> {
         return dbQuery.oneOrNone<Category>(findById, [id, userId]);
     }
 
-    async findByNameAndEvent(userId: string, name: string, eventId: string): Promise<Category | null> {
-        return dbQuery.oneOrNone<Category>(findByNameAndEvent, [userId, name, eventId]);
+    async findByName(userId: string, name: string): Promise<Category | null> {
+        return dbQuery.oneOrNone<Category>(findByName, [userId, name]);
     }
 
     async create(userId: string, data: CreateCategoryValidator): Promise<Category> {
-        return dbQuery.one<Category>(create, [userId, data.event_id, data.name]);
+        return dbQuery.one<Category>(create, [userId, data.name]);
     }
 
-    async findOrCreate(userId: string, data: CreateCategoryValidator): Promise<Category> {
-        const existing = await this.findByNameAndEvent(userId, data.name, data.event_id);
+    async findOrCreate(userId: string, name: string): Promise<Category> {
+        const existing = await this.findByName(userId, name);
         if (existing) return existing;
-        return this.create(userId, data);
+        return this.create(userId, { name });
     }
 
     async update(id: string, userId: string, data: UpdateCategoryValidator): Promise<Category> {
-        return dbQuery.one<Category>(update, [
-            data.name ?? null,
-            data.event_id ?? null,
-            id,
-            userId,
-        ]);
+        return dbQuery.one<Category>(update, [data.name ?? null, id, userId]);
     }
 
     async delete(id: string, userId: string): Promise<void> {

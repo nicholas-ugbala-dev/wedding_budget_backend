@@ -1,20 +1,20 @@
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { ResponseHandler } from '../../utils/helpers/response.handler';
-import { IEventsService } from './interface/events.interface';
-import { CreateEventValidator, UpdateEventValidator } from './validation/events.validations';
-import eventsService from './events.service';
+import { IClientsService } from './interface/clients.interface';
+import { CreateClientValidator, UpdateClientValidator, ListClientsValidator } from './validation/clients.validations';
+import clientsService from './clients.service';
 
-export class EventsController {
-    constructor(private readonly service: IEventsService) {}
+export class ClientsController {
+    constructor(private readonly service: IClientsService) {}
 
     list = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
         const userId = req.user?.id as string;
-        const client_id = req.query.client_id as string | undefined;
-        const data = await this.service.list(userId, client_id);
+        const filters = req.query as unknown as ListClientsValidator;
+        const data = await this.service.list(userId, filters);
 
         new ResponseHandler(req, res).success({
-            message: 'Events fetched successfully',
+            message: 'Clients fetched successfully',
             code: StatusCodes.OK,
             data,
         });
@@ -22,11 +22,11 @@ export class EventsController {
 
     create = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
         const userId = req.user?.id as string;
-        const body = req.body as CreateEventValidator;
+        const body = req.body as CreateClientValidator;
         const data = await this.service.create(userId, body);
 
         new ResponseHandler(req, res).success({
-            message: 'Event created successfully',
+            message: 'Client created successfully',
             code: StatusCodes.CREATED,
             data,
         });
@@ -35,11 +35,11 @@ export class EventsController {
     update = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
         const userId = req.user?.id as string;
         const { id } = req.params;
-        const body = req.body as UpdateEventValidator;
+        const body = req.body as UpdateClientValidator;
         const data = await this.service.update(id, userId, body);
 
         new ResponseHandler(req, res).success({
-            message: 'Event updated successfully',
+            message: 'Client updated successfully',
             code: StatusCodes.OK,
             data,
         });
@@ -51,10 +51,10 @@ export class EventsController {
         await this.service.delete(id, userId);
 
         new ResponseHandler(req, res).success({
-            message: 'Event removed successfully',
+            message: 'Client removed successfully',
             code: StatusCodes.OK,
         });
     };
 }
 
-export const eventsController = new EventsController(eventsService);
+export const clientsController = new ClientsController(clientsService);

@@ -10,8 +10,8 @@ export class DashboardController {
 
     get = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
         const userId = req.user?.id as string;
-        const { ceremony_id } = req.query as unknown as GetDashboardValidator;
-        const data = await this.service.getDashboard(userId, ceremony_id);
+        const { event_id, client_id } = req.query as unknown as GetDashboardValidator;
+        const data = await this.service.getDashboard(userId, event_id, client_id);
 
         new ResponseHandler(req, res).success({
             message: 'Dashboard fetched successfully',

@@ -28,6 +28,29 @@ const findById = `
     WHERE user_id = $1 AND id = $2
 `;
 
-const CurrenciesQueries = { findAll, findById, findByCode, add, remove };
+// $1 = client_id | $2 = user_id (ownership check)
+const findByClientId = `
+    SELECT cl.currency_code AS id, cl.currency_code, true AS is_base
+    FROM clients cl
+    WHERE cl.id = $1 AND cl.user_id = $2
+    UNION ALL
+    SELECT cc.currency_code AS id, cc.currency_code, false AS is_base
+    FROM client_currencies cc
+    JOIN clients c ON c.id = cc.client_id
+    WHERE cc.client_id = $1 AND c.user_id = $2
+    ORDER BY is_base DESC, id ASC
+`;
+
+// $1 = client_id | $2 = currency_code
+const upsertClientCurrency = `
+    INSERT INTO client_currencies (client_id, currency_code)
+    VALUES ($1, $2)
+    ON CONFLICT (client_id, currency_code) DO NOTHING
+`;
+
+// $1 = client_id
+const deleteClientCurrencies = `DELETE FROM client_currencies WHERE client_id = $1`;
+
+const CurrenciesQueries = { findAll, findById, findByCode, add, remove, findByClientId, upsertClientCurrency, deleteClientCurrencies };
 
 export default CurrenciesQueries;

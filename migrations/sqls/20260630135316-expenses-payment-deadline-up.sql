@@ -1,1 +1,0 @@
-ALTER TABLE expenses ADD COLUMN payment_deadline DATE;

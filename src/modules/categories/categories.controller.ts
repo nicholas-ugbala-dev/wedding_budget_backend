@@ -10,8 +10,7 @@ export class CategoriesController {
 
     list = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
         const userId = req.user?.id as string;
-        const ceremony_id = req.query.ceremony_id as string | undefined;
-        const data = await this.service.list(userId, ceremony_id);
+        const data = await this.service.list(userId);
 
         new ResponseHandler(req, res).success({
             message: 'Categories fetched successfully',
