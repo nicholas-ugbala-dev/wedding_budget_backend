@@ -45,15 +45,7 @@ export class AuthRepository implements IAuthRepository {
     }
 
     async updateOnboarding(userId: string, data: OnboardingValidator): Promise<SafeUser> {
-        const { base_currency, event_name, event_date, wedding_location } = data;
-        const result: SafeUser = await dbQuery.one(updateOnboarding, [
-            base_currency,
-            event_name    ?? null,
-            event_date    ?? null,
-            wedding_location ?? null,
-            userId,
-        ]);
-
+        const result: SafeUser = await dbQuery.one(updateOnboarding, [data.base_currency, userId]);
         return result;
     }
 

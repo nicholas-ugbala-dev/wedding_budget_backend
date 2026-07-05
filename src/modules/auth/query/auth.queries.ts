@@ -1,30 +1,29 @@
 const register = `
     INSERT INTO users (first_name, last_name, email, password, account_type)
     VALUES ($1, $2, $3, $4, $5)
-    RETURNING id, first_name, last_name, email, account_type, base_currency,
-              event_name, event_date, wedding_location, created_at
+    RETURNING id, first_name, last_name, email, account_type, base_currency, created_at
 `;
 
 const findByEmail = `
     SELECT id, first_name, last_name, email, password,
-           account_type, base_currency, event_name, event_date, wedding_location, created_at
+           account_type, base_currency, created_at
     FROM users
     WHERE email = $1
 `;
 
 const findById = `
     SELECT id, first_name, last_name, email,
-           account_type, base_currency, event_name, event_date, wedding_location, created_at
+           account_type, base_currency, created_at
     FROM users
     WHERE id = $1
 `;
 
 const updateOnboarding = `
     UPDATE users
-    SET base_currency = $1, event_name = $2, event_date = $3, wedding_location = $4
-    WHERE id = $5
+    SET base_currency = $1
+    WHERE id = $2
     RETURNING id, first_name, last_name, email,
-              account_type, base_currency, event_name, event_date, wedding_location, created_at
+              account_type, base_currency, created_at
 `;
 
 const updateProfile = `
@@ -33,7 +32,7 @@ const updateProfile = `
         last_name  = COALESCE($2, last_name)
     WHERE id = $3
     RETURNING id, first_name, last_name, email,
-              account_type, base_currency, event_name, event_date, wedding_location, created_at
+              account_type, base_currency, created_at
 `;
 
 const bulkInsertEvents = (count: number): string => {
