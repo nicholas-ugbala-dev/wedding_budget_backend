@@ -27,6 +27,15 @@ const updateOnboarding = `
               account_type, base_currency, event_name, event_date, wedding_location, created_at
 `;
 
+const updateProfile = `
+    UPDATE users
+    SET first_name = COALESCE($1, first_name),
+        last_name  = COALESCE($2, last_name)
+    WHERE id = $3
+    RETURNING id, first_name, last_name, email,
+              account_type, base_currency, event_name, event_date, wedding_location, created_at
+`;
+
 const bulkInsertEvents = (count: number): string => {
     const values = Array.from({ length: count }, (_, i) => `($1, $${i + 2})`).join(', ');
     return `INSERT INTO events (user_id, name) VALUES ${values}`;
@@ -71,6 +80,7 @@ const AuthQueries = {
     findByEmail,
     findById,
     updateOnboarding,
+    updateProfile,
     bulkInsertEvents,
     bulkInsertCurrencies,
     createResetToken,

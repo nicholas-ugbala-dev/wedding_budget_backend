@@ -6,7 +6,10 @@ import expensesRepository from './repository/expenses.repository';
 import vendorsRepository from '../vendors/repository/vendors.repository';
 import categoriesRepository from '../categories/repository/categories.repository';
 import eventsRepository from '../events/repository/events.repository';
+import clientsRepository from '../clients/repository/clients.repository';
 import currenciesRepository from '../currencies/repository/currencies.repository';
+import authRepository from '../auth/repository/auth.repository';
+import { getRate } from '../../utils/exchange-rate';
 
 export class ExpensesService implements IExpensesService {
     constructor(private readonly repository: IExpensesRepository) {}
@@ -27,23 +30,24 @@ export class ExpensesService implements IExpensesService {
         const event = await eventsRepository.findById(data.event_id, userId);
         if (!event) throw new ApiError(404, 'Event not found');
 
-        // Validate base_currency is in user's configured currencies (if explicitly provided)
-        if (data.base_currency) {
-            const currency = await currenciesRepository.findByCode(userId, data.base_currency);
-            if (!currency) throw new ApiError(400, 'Currency not configured for this account');
+        // Derive base_currency: vendor currency (stable) → client fallback → DB default 'NGN'
+        if (!data.base_currency) {
+            if (event.vendor_currency) {
+                (data as Record<string, unknown>).base_currency = event.vendor_currency;
+            } else if (event.client_id) {
+                const client = await clientsRepository.findById(event.client_id, userId);
+                if (client) (data as Record<string, unknown>).base_currency = client.currency_code;
+            }
         }
 
-        // Resolve category — prefer explicit id, otherwise findOrCreate by name+ceremony_id
+        // Resolve category — prefer explicit id, otherwise findOrCreate by name
         let categoryId: string;
         if (data.category_id) {
             const cat = await categoriesRepository.findById(data.category_id, userId);
             if (!cat) throw new ApiError(404, 'Category not found');
             categoryId = cat.id;
         } else {
-            const cat = await categoriesRepository.findOrCreate(userId, {
-                name: data.category_name!,
-                event_id: data.event_id,
-            });
+            const cat = await categoriesRepository.findOrCreate(userId, data.category_name!);
             categoryId = cat.id;
         }
 
@@ -62,7 +66,31 @@ export class ExpensesService implements IExpensesService {
             vendorId = vendor.id;
         }
 
-        return this.repository.create(userId, data, categoryId, vendorId);
+        // Derive reporting_amount for actual_amount
+        let reportingCurrencyCode: string | null = null;
+        let reportingAmount: number | null = null;
+
+        if (data.actual_amount != null) {
+            const user = await authRepository.findById(userId);
+            const reportingCurrency = event.client_id
+                ? (await clientsRepository.findById(event.client_id, userId))?.currency_code ?? user!.base_currency
+                : user!.base_currency;
+
+            const baseCurrency = (data.base_currency as string | undefined) ?? event.vendor_currency ?? 'NGN';
+
+            if (baseCurrency === reportingCurrency) {
+                reportingAmount = data.actual_amount;
+                reportingCurrencyCode = reportingCurrency;
+            } else {
+                const liveRate = await getRate(baseCurrency, reportingCurrency);
+                if (liveRate != null) {
+                    reportingAmount = Math.round(data.actual_amount * liveRate);
+                    reportingCurrencyCode = reportingCurrency;
+                }
+            }
+        }
+
+        return this.repository.create(userId, data, categoryId, vendorId, reportingCurrencyCode, reportingAmount);
     }
 
     async update(id: string, userId: string, data: UpdateExpenseValidator): Promise<ExpenseRow> {
@@ -75,7 +103,35 @@ export class ExpensesService implements IExpensesService {
             if (!event) throw new ApiError(404, 'Event not found');
         }
 
-        return this.repository.update(id, userId, data, existing);
+        // Recalculate reporting_amount when actual_amount changes
+        let reportingCurrencyCode: string | null | undefined = undefined;
+        let reportingAmount: number | null | undefined = undefined;
+
+        if ('actual_amount' in data) {
+            const newActualAmount = data.actual_amount ?? null;
+            if (newActualAmount != null) {
+                const user = await authRepository.findById(userId);
+                const reportingCurrency = existing.client_id
+                    ? (await clientsRepository.findById(existing.client_id, userId))?.currency_code ?? user!.base_currency
+                    : user!.base_currency;
+
+                if (existing.base_currency === reportingCurrency) {
+                    reportingAmount = newActualAmount;
+                    reportingCurrencyCode = reportingCurrency;
+                } else {
+                    const liveRate = await getRate(existing.base_currency, reportingCurrency);
+                    if (liveRate != null) {
+                        reportingAmount = Math.round(newActualAmount * liveRate);
+                        reportingCurrencyCode = reportingCurrency;
+                    }
+                }
+            } else {
+                reportingAmount = null;
+                reportingCurrencyCode = null;
+            }
+        }
+
+        return this.repository.update(id, userId, data, existing, reportingCurrencyCode, reportingAmount);
     }
 
     async delete(id: string, userId: string): Promise<void> {

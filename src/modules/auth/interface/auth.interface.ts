@@ -5,6 +5,7 @@ import {
     OnboardingValidator,
     OnboardingEventsValidator,
     OnboardingCurrenciesValidator,
+    UpdateProfileValidator,
 } from "../validation/auth.validations";
 
 export interface AuthTokenPayload {
@@ -36,6 +37,7 @@ export interface IAuthRepository {
     findResetToken(token: string): Promise<ResetTokenRow | null>;
     deleteResetToken(token: string): Promise<void>;
     updatePassword(userId: string, hashedPassword: string): Promise<void>;
+    updateProfile(userId: string, data: UpdateProfileValidator): Promise<SafeUser>;
 }
 
 export interface IAuthService {
@@ -47,4 +49,5 @@ export interface IAuthService {
     saveOnboardingCurrencies(userId: string, data: OnboardingCurrenciesValidator): Promise<void>;
     forgotPassword(email: string): Promise<void>;
     resetPassword(token: string, newPassword: string): Promise<void>;
+    updateProfile(userId: string, data: UpdateProfileValidator): Promise<SafeUser>;
 }

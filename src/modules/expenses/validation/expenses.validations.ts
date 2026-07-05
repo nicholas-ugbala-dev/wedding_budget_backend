@@ -40,6 +40,7 @@ export const updateExpenseValidator = z.object({
 
 export const listExpensesValidator = z.object({
     event_id: z.string().uuid().optional(),
+    client_id: z.string().uuid().optional(),
     status: z.enum(['unpaid', 'partial', 'paid']).optional(),
     search: z.string().optional(),
     page: z.coerce.number().int().min(1).default(1),

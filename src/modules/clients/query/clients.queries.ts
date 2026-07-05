@@ -1,10 +1,23 @@
 const COLS = `id, user_id, first_name, last_name, currency_code, created_at, updated_at`;
 
-const findAll = `
-    SELECT ${COLS}
-    FROM clients
-    WHERE user_id = $1
-    ORDER BY created_at ASC
+// $1 = user_id | optional $2 = search pattern | then $limit $offset
+const findAll = (hasSearch: boolean) => `
+    SELECT
+        c.id, c.user_id, c.first_name, c.last_name, c.currency_code,
+        c.created_at, c.updated_at,
+        (SELECT e.name FROM events e
+         WHERE e.client_id = c.id AND e.date >= CURRENT_DATE
+         ORDER BY e.date ASC LIMIT 1) AS next_event_name,
+        (SELECT e.date::text FROM events e
+         WHERE e.client_id = c.id AND e.date >= CURRENT_DATE
+         ORDER BY e.date ASC LIMIT 1) AS next_event_date,
+        COALESCE((SELECT SUM(e.budget) FROM events e WHERE e.client_id = c.id), 0) AS total_budget,
+        COUNT(*) OVER() AS total_count
+    FROM clients c
+    WHERE c.user_id = $1
+    ${hasSearch ? 'AND (c.first_name ILIKE $2 OR c.last_name ILIKE $2)' : ''}
+    ORDER BY c.created_at ASC
+    LIMIT ${hasSearch ? '$3' : '$2'} OFFSET ${hasSearch ? '$4' : '$3'}
 `;
 
 const findById = `

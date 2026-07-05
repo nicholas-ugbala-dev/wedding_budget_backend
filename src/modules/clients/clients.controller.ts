@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { ResponseHandler } from '../../utils/helpers/response.handler';
 import { IClientsService } from './interface/clients.interface';
-import { CreateClientValidator, UpdateClientValidator } from './validation/clients.validations';
+import { CreateClientValidator, UpdateClientValidator, ListClientsValidator } from './validation/clients.validations';
 import clientsService from './clients.service';
 
 export class ClientsController {
@@ -10,7 +10,8 @@ export class ClientsController {
 
     list = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
         const userId = req.user?.id as string;
-        const data = await this.service.list(userId);
+        const filters = req.query as unknown as ListClientsValidator;
+        const data = await this.service.list(userId, filters);
 
         new ResponseHandler(req, res).success({
             message: 'Clients fetched successfully',

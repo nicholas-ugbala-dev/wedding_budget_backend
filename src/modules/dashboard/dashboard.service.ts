@@ -26,10 +26,11 @@ interface RawDashboardRow {
 }
 
 export class DashboardService implements IDashboardService {
-    async getDashboard(userId: string, ceremonyId?: string): Promise<DashboardData> {
+    async getDashboard(userId: string, eventId?: string, clientId?: string): Promise<DashboardData> {
         const row = await dbQuery.one<RawDashboardRow>(DashboardQueries.getDashboard, [
             userId,
-            ceremonyId ?? null,
+            eventId ?? null,
+            clientId ?? null,
         ]);
 
         const kpis = row.kpis ?? EMPTY_KPIS;
@@ -40,6 +41,7 @@ export class DashboardService implements IDashboardService {
             bar_chart: categories.map(c => ({
                 category: c.category,
                 actual_amount: c.actual_amount,
+                planned_amount: c.planned_amount,
                 total_paid: c.total_paid,
             })),
             donut_chart: categories.map(c => ({

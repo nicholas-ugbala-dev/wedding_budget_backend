@@ -6,28 +6,33 @@ import EventsQueries from '../query/events.queries';
 const { findAll, findById, create, update, remove } = EventsQueries;
 
 export class EventsRepository implements IEventsRepository {
-    async findAll(userId: string): Promise<Event[]> {
-        return dbQuery.manyOrNone<Event>(findAll, [userId]) as Promise<Event[]>;
+    async findAll(userId: string, clientId?: string): Promise<Event[]> {
+        // When clientId is provided, ownership is validated by the service layer.
+        // The query uses just the one relevant param as $1.
+        const param = clientId ?? userId;
+        return dbQuery.manyOrNone<Event>(findAll(clientId), [param]) as Promise<Event[]>;
     }
 
     async findById(id: string, userId: string): Promise<Event | null> {
         return dbQuery.oneOrNone<Event>(findById, [id, userId]);
     }
 
-    async create(userId: string, data: CreateEventValidator): Promise<Event> {
+    async create(userId: string, data: CreateEventValidator, reportingCurrencyCode: string | null, reportingBudget: number | null): Promise<Event> {
         return dbQuery.one<Event>(create, [
             userId,
             data.name,
-            data.event_type   ?? null,
-            data.date         ?? null,
-            data.location     ?? null,
+            data.event_type      ?? null,
+            data.date            ?? null,
+            data.location        ?? null,
             data.vendor_currency ?? null,
-            data.budget       ?? null,
-            data.client_id    ?? null,
+            data.budget          ?? null,
+            data.client_id       ?? null,
+            reportingCurrencyCode,
+            reportingBudget,
         ]);
     }
 
-    async update(id: string, userId: string, data: UpdateEventValidator): Promise<Event> {
+    async update(id: string, userId: string, data: UpdateEventValidator, reportingCurrencyCode: string | null, reportingBudget: number | null): Promise<Event> {
         return dbQuery.one<Event>(update, [
             data.name            ?? null,
             data.event_type      ?? null,
@@ -36,6 +41,8 @@ export class EventsRepository implements IEventsRepository {
             data.vendor_currency ?? null,
             data.budget          ?? null,
             data.client_id       ?? null,
+            reportingCurrencyCode,
+            reportingBudget,
             id,
             userId,
         ]);

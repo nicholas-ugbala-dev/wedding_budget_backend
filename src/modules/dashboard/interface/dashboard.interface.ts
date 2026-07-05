@@ -10,6 +10,7 @@ export interface DashboardKpis {
 export interface CategoryBreakdown {
     category: string;
     actual_amount: string;
+    planned_amount: string;
     total_paid: string;
     pct: string;
 }
@@ -41,12 +42,12 @@ export interface NeedsAttentionItem {
 
 export interface DashboardData {
     kpis: DashboardKpis;
-    bar_chart: Pick<CategoryBreakdown, 'category' | 'actual_amount' | 'total_paid'>[];
+    bar_chart: Pick<CategoryBreakdown, 'category' | 'actual_amount' | 'planned_amount' | 'total_paid'>[];
     donut_chart: { category: string; amount: string; pct: string }[];
     payment_progress: PaymentProgressItem[];
     needs_attention: NeedsAttentionItem[];
 }
 
 export interface IDashboardService {
-    getDashboard(userId: string, ceremonyId?: string): Promise<DashboardData>;
+    getDashboard(userId: string, eventId?: string, clientId?: string): Promise<DashboardData>;
 }

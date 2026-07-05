@@ -8,6 +8,7 @@ import { categoriesRouter } from "../../modules/categories/categories.routes";
 import { expensesRouter } from "../../modules/expenses/expenses.routes";
 import { paymentsRouter } from "../../modules/payments/payments.routes";
 import { dashboardRouter } from "../../modules/dashboard/dashboard.routes";
+import { settingsRouter } from "../../modules/settings/settings.routes";
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use('/categories', categoriesRouter);
 router.use('/expenses', expensesRouter);
 router.use('/payments', paymentsRouter);
 router.use('/dashboard', dashboardRouter);
+router.use('/settings', settingsRouter);
 
 export default router;

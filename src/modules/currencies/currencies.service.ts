@@ -1,13 +1,20 @@
 import { ApiError } from '../../utils/error';
-import { ICurrenciesService, ICurrenciesRepository, UserCurrency } from './interface/currencies.interface';
+import { ICurrenciesService, ICurrenciesRepository, UserCurrency, ClientCurrency } from './interface/currencies.interface';
 import { AddCurrencyValidator } from './validation/currencies.validations';
 import currenciesRepository from './repository/currencies.repository';
+import clientsRepository from '../clients/repository/clients.repository';
 
 export class CurrenciesService implements ICurrenciesService {
     constructor(private readonly repository: ICurrenciesRepository) {}
 
     async list(userId: string): Promise<UserCurrency[]> {
         return this.repository.findAll(userId);
+    }
+
+    async listForClient(userId: string, clientId: string): Promise<ClientCurrency[]> {
+        const client = await clientsRepository.findById(clientId, userId);
+        if (!client) throw new ApiError(403, 'Client not found or access denied');
+        return this.repository.findByClientId(clientId, userId);
     }
 
     async add(userId: string, data: AddCurrencyValidator): Promise<UserCurrency> {
@@ -24,6 +31,14 @@ export class CurrenciesService implements ICurrenciesService {
             throw new ApiError(404, `${currencyCode} wallet not found`);
         }
         await this.repository.remove(userId, currencyCode.toUpperCase());
+    }
+
+    async upsertClientCurrency(clientId: string, currencyCode: string): Promise<void> {
+        return this.repository.upsertClientCurrency(clientId, currencyCode);
+    }
+
+    async setClientCurrencies(clientId: string, codes: string[]): Promise<void> {
+        return this.repository.setClientCurrencies(clientId, codes);
     }
 }
 

@@ -1,4 +1,5 @@
-import { CreateClientValidator, UpdateClientValidator } from '../validation/clients.validations';
+import { CreateClientValidator, UpdateClientValidator, ListClientsValidator } from '../validation/clients.validations';
+import { PaginatedResult } from '../../../utils/helpers/pagination.helper';
 
 export interface Client {
     id: string;
@@ -11,7 +12,7 @@ export interface Client {
 }
 
 export interface IClientsRepository {
-    findAll(userId: string): Promise<Client[]>;
+    findAll(userId: string, filters: ListClientsValidator): Promise<{ rows: Client[]; total: number }>;
     findById(id: string, userId: string): Promise<Client | null>;
     create(userId: string, data: CreateClientValidator): Promise<Client>;
     update(id: string, userId: string, data: UpdateClientValidator): Promise<Client>;
@@ -19,7 +20,7 @@ export interface IClientsRepository {
 }
 
 export interface IClientsService {
-    list(userId: string): Promise<Client[]>;
+    list(userId: string, filters: ListClientsValidator): Promise<PaginatedResult<Client>>;
     create(userId: string, data: CreateClientValidator): Promise<Client>;
     update(id: string, userId: string, data: UpdateClientValidator): Promise<Client>;
     delete(id: string, userId: string): Promise<void>;

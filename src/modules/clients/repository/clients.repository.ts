@@ -1,13 +1,26 @@
 import { dbQuery } from '../../../config/database/helper/query.helpers';
 import { IClientsRepository, Client } from '../interface/clients.interface';
-import { CreateClientValidator, UpdateClientValidator } from '../validation/clients.validations';
+import { CreateClientValidator, UpdateClientValidator, ListClientsValidator } from '../validation/clients.validations';
 import ClientsQueries from '../query/clients.queries';
 
-const { findAll, findById, create, update, remove } = ClientsQueries;
+const { findById, create, update, remove } = ClientsQueries;
 
 export class ClientsRepository implements IClientsRepository {
-    async findAll(userId: string): Promise<Client[]> {
-        return dbQuery.manyOrNone<Client>(findAll, [userId]) as Promise<Client[]>;
+    async findAll(userId: string, filters: ListClientsValidator): Promise<{ rows: Client[]; total: number }> {
+        const { search, page, limit } = filters;
+        const hasSearch = !!search?.trim();
+        const pattern = hasSearch ? `%${search!.trim()}%` : undefined;
+
+        const params: (string | number)[] = [userId];
+        if (hasSearch) params.push(pattern!);
+        params.push(limit);
+        params.push((page - 1) * limit);
+
+        type Row = Client & { total_count: string };
+        const rows = await dbQuery.manyOrNone<Row>(ClientsQueries.findAll(hasSearch), params) ?? [];
+        const total = rows.length ? parseInt(rows[0].total_count, 10) : 0;
+
+        return { rows, total };
     }
 
     async findById(id: string, userId: string): Promise<Client | null> {

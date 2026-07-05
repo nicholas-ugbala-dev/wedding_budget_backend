@@ -10,7 +10,8 @@ export class EventsController {
 
     list = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
         const userId = req.user?.id as string;
-        const data = await this.service.list(userId);
+        const client_id = req.query.client_id as string | undefined;
+        const data = await this.service.list(userId, client_id);
 
         new ResponseHandler(req, res).success({
             message: 'Events fetched successfully',
