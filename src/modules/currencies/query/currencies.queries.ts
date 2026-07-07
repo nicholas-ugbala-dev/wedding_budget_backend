@@ -1,7 +1,19 @@
 const findAll = `
-    SELECT id, user_id, currency_code, created_at
-    FROM user_currencies
-    WHERE user_id = $1
+    SELECT u.base_currency AS id, u.id::text AS user_id, u.base_currency AS currency_code, u.created_at
+    FROM users u
+    WHERE u.id = $1
+    UNION ALL
+    SELECT uc.id::text, uc.user_id::text, uc.currency_code, uc.created_at
+    FROM user_currencies uc
+    WHERE uc.user_id = $1
+    UNION ALL
+    SELECT ev.vendor_currency, $1::text, ev.vendor_currency, MIN(ev.created_at)
+    FROM events ev
+    WHERE ev.user_id = $1
+      AND ev.vendor_currency IS NOT NULL
+      AND ev.vendor_currency != (SELECT base_currency FROM users WHERE id = $1)
+      AND ev.vendor_currency NOT IN (SELECT currency_code FROM user_currencies WHERE user_id = $1)
+    GROUP BY ev.vendor_currency
     ORDER BY created_at ASC
 `;
 
