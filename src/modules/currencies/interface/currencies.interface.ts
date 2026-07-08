@@ -4,13 +4,16 @@ export interface UserCurrency {
     id: string;
     user_id: string;
     currency_code: string;
+    is_base: boolean;
     created_at: Date;
 }
 
 export interface ClientCurrency {
-    id: string;         // = currency_code (used as select value on frontend)
+    id: string;
+    user_id: string;    // = client_id
     currency_code: string;
     is_base: boolean;
+    created_at: Date;
 }
 
 export interface ICurrenciesRepository {
@@ -19,8 +22,10 @@ export interface ICurrenciesRepository {
     findByCode(userId: string, currencyCode: string): Promise<UserCurrency | null>;
     add(userId: string, data: AddCurrencyValidator): Promise<UserCurrency>;
     remove(userId: string, currencyCode: string): Promise<void>;
+    upsertUserCurrency(userId: string, currencyCode: string): Promise<void>;
     findByClientId(clientId: string, userId: string): Promise<ClientCurrency[]>;
     upsertClientCurrency(clientId: string, currencyCode: string): Promise<void>;
+    insertClientBaseWallet(clientId: string, currencyCode: string): Promise<void>;
     setClientCurrencies(clientId: string, codes: string[]): Promise<void>;
 }
 
@@ -29,6 +34,8 @@ export interface ICurrenciesService {
     listForClient(userId: string, clientId: string): Promise<ClientCurrency[]>;
     add(userId: string, data: AddCurrencyValidator): Promise<UserCurrency>;
     remove(userId: string, currencyCode: string): Promise<void>;
+    upsertUserCurrency(userId: string, currencyCode: string): Promise<void>;
     upsertClientCurrency(clientId: string, currencyCode: string): Promise<void>;
+    insertClientBaseWallet(clientId: string, currencyCode: string): Promise<void>;
     setClientCurrencies(clientId: string, codes: string[]): Promise<void>;
 }

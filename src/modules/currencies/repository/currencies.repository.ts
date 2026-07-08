@@ -3,7 +3,10 @@ import { ICurrenciesRepository, UserCurrency, ClientCurrency } from '../interfac
 import { AddCurrencyValidator } from '../validation/currencies.validations';
 import CurrenciesQueries from '../query/currencies.queries';
 
-const { findAll, findById, findByCode, add, remove, findByClientId, upsertClientCurrency, deleteClientCurrencies } = CurrenciesQueries;
+const {
+    findAll, findById, findByCode, add, remove, upsertUserCurrency,
+    findByClientId, upsertClientCurrency, insertClientBaseWallet, deleteClientCurrencies,
+} = CurrenciesQueries;
 
 export class CurrenciesRepository implements ICurrenciesRepository {
     async findAll(userId: string): Promise<UserCurrency[]> {
@@ -30,8 +33,16 @@ export class CurrenciesRepository implements ICurrenciesRepository {
         return (await dbQuery.manyOrNone<ClientCurrency>(findByClientId, [clientId, userId])) ?? [];
     }
 
+    async upsertUserCurrency(userId: string, currencyCode: string): Promise<void> {
+        await dbQuery.manyOrNone(upsertUserCurrency, [userId, currencyCode.toUpperCase()]);
+    }
+
     async upsertClientCurrency(clientId: string, currencyCode: string): Promise<void> {
         await dbQuery.manyOrNone(upsertClientCurrency, [clientId, currencyCode.toUpperCase()]);
+    }
+
+    async insertClientBaseWallet(clientId: string, currencyCode: string): Promise<void> {
+        await dbQuery.manyOrNone(insertClientBaseWallet, [clientId, currencyCode.toUpperCase()]);
     }
 
     async setClientCurrencies(clientId: string, codes: string[]): Promise<void> {

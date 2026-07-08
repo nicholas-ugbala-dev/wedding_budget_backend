@@ -40,8 +40,12 @@ export class EventsService implements IEventsService {
         const { reportingCurrencyCode, reportingBudget } = await this.deriveReportingBudget(userId, data.client_id, data.budget);
         const event = await this.repository.create(userId, data, reportingCurrencyCode, reportingBudget);
 
-        if (event.client_id && event.vendor_currency) {
-            await currenciesService.upsertClientCurrency(event.client_id, event.vendor_currency);
+        if (event.vendor_currency) {
+            if (event.client_id) {
+                await currenciesService.upsertClientCurrency(event.client_id, event.vendor_currency);
+            } else {
+                await currenciesService.upsertUserCurrency(userId, event.vendor_currency);
+            }
         }
         return event;
     }
@@ -55,8 +59,13 @@ export class EventsService implements IEventsService {
         const { reportingCurrencyCode, reportingBudget } = await this.deriveReportingBudget(userId, clientId, budget);
 
         const event = await this.repository.update(id, userId, data, reportingCurrencyCode, reportingBudget);
-        if (event.client_id && event.vendor_currency) {
-            await currenciesService.upsertClientCurrency(event.client_id, event.vendor_currency);
+
+        if (event.vendor_currency) {
+            if (event.client_id) {
+                await currenciesService.upsertClientCurrency(event.client_id, event.vendor_currency);
+            } else {
+                await currenciesService.upsertUserCurrency(userId, event.vendor_currency);
+            }
         }
         return event;
     }

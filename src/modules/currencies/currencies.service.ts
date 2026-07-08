@@ -33,8 +33,16 @@ export class CurrenciesService implements ICurrenciesService {
         await this.repository.remove(userId, currencyCode.toUpperCase());
     }
 
+    async upsertUserCurrency(userId: string, currencyCode: string): Promise<void> {
+        return this.repository.upsertUserCurrency(userId, currencyCode);
+    }
+
     async upsertClientCurrency(clientId: string, currencyCode: string): Promise<void> {
         return this.repository.upsertClientCurrency(clientId, currencyCode);
+    }
+
+    async insertClientBaseWallet(clientId: string, currencyCode: string): Promise<void> {
+        return this.repository.insertClientBaseWallet(clientId, currencyCode);
     }
 
     async setClientCurrencies(clientId: string, codes: string[]): Promise<void> {

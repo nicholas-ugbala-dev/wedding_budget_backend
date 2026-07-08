@@ -6,9 +6,9 @@ export const createPaymentValidator = z.object({
     payment_type:         z.enum(PAYMENT_TYPE_VALUES),
     user_currency_id:     z.uuid().optional(),
     wallet_currency_code: z.string().length(3).optional(),
-    wallet_amount:        z.number().int().positive(),
+    wallet_amount:        z.number().positive(),
     exchange_rate:        z.number().positive().optional(),
-    base_amount:          z.number().int().positive().optional(),
+    base_amount:          z.number().positive().optional(),
     payment_date:         z.string().min(1),
     notes:                z.string().optional(),
 }).refine(
@@ -33,9 +33,9 @@ export const updatePaymentValidator = z.object({
     payment_type:         z.enum(PAYMENT_TYPE_VALUES).optional(),
     user_currency_id:     z.uuid().optional(),
     wallet_currency_code: z.string().length(3).optional(),
-    wallet_amount:        z.number().int().positive().optional(),
+    wallet_amount:        z.number().positive().optional(),
     exchange_rate:        z.number().positive().nullable().optional(),
-    base_amount:          z.number().int().positive().optional(),
+    base_amount:          z.number().positive().optional(),
     payment_date:         z.string().min(1).optional(),
     notes:                z.string().nullable().optional(),
 });

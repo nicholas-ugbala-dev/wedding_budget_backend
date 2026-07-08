@@ -40,10 +40,22 @@ const bulkInsertEvents = (count: number): string => {
     return `INSERT INTO events (user_id, name) VALUES ${values}`;
 };
 
+const insertBaseWallet = `
+    INSERT INTO user_currencies (user_id, currency_code, is_base)
+    VALUES ($1, $2, TRUE)
+    ON CONFLICT (user_id, currency_code) DO UPDATE SET is_base = TRUE
+`;
+
+const updateBaseWallet = `
+    UPDATE user_currencies
+    SET currency_code = $2
+    WHERE user_id = $1 AND is_base = TRUE
+`;
+
 const bulkInsertCurrencies = (count: number): string => {
     const values = Array.from({ length: count }, (_, i) => `($1, $${i + 2})`).join(', ');
     return `
-        INSERT INTO user_currencies (user_id, currency_code)
+        INSERT INTO user_currencies (user_id, currency_code, is_base)
         VALUES ${values}
         ON CONFLICT (user_id, currency_code) DO NOTHING
     `;
@@ -80,6 +92,8 @@ const AuthQueries = {
     findById,
     updateOnboarding,
     updateProfile,
+    insertBaseWallet,
+    updateBaseWallet,
     bulkInsertEvents,
     bulkInsertCurrencies,
     createResetToken,

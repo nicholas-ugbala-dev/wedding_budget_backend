@@ -15,6 +15,7 @@ export class ClientsService implements IClientsService {
 
     async create(userId: string, data: CreateClientValidator): Promise<Client> {
         const client = await this.repository.create(userId, data);
+        await currenciesService.insertClientBaseWallet(client.id, data.currency_code);
         if (data.extra_currencies?.length) {
             await currenciesService.setClientCurrencies(client.id, data.extra_currencies);
         }
@@ -25,6 +26,9 @@ export class ClientsService implements IClientsService {
         const existing = await this.repository.findById(id, userId);
         if (!existing) throw new ApiError(404, 'Client not found');
         const client = await this.repository.update(id, userId, data);
+        if (data.currency_code) {
+            await currenciesService.insertClientBaseWallet(id, data.currency_code);
+        }
         if (data.extra_currencies !== undefined) {
             await currenciesService.setClientCurrencies(id, data.extra_currencies);
         }

@@ -11,6 +11,8 @@ const {
     findById,
     updateOnboarding,
     updateProfile,
+    insertBaseWallet,
+    updateBaseWallet,
     bulkInsertEvents,
     bulkInsertCurrencies,
     createResetToken,
@@ -31,6 +33,9 @@ export class AuthRepository implements IAuthRepository {
             account_type,
         ]);
 
+        // Seed default base wallet (NGN) — updated to the real currency during onboarding
+        await dbQuery.manyOrNone(insertBaseWallet, [result.id, 'NGN']);
+
         return result;
     };
 
@@ -46,6 +51,8 @@ export class AuthRepository implements IAuthRepository {
 
     async updateOnboarding(userId: string, data: OnboardingValidator): Promise<SafeUser> {
         const result: SafeUser = await dbQuery.one(updateOnboarding, [data.base_currency, userId]);
+        // Swap the base wallet to the chosen currency
+        await dbQuery.manyOrNone(updateBaseWallet, [userId, data.base_currency]);
         return result;
     }
 
