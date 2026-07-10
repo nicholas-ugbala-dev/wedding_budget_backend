@@ -1,13 +1,35 @@
 import { dbQuery } from '../../../config/database/helper/query.helpers';
 import { IExpensesRepository, ExpenseRow, ExpenseDetail } from '../interface/expenses.interface';
-import { CreateExpenseValidator, UpdateExpenseValidator, ListExpensesValidator } from '../validation/expenses.validations';
+import {
+    CreateExpenseValidator,
+    UpdateExpenseValidator,
+    ListExpensesValidator,
+} from '../validation/expenses.validations';
 import ExpensesQueries, { BASE_SELECT } from '../query/expenses.queries';
+import { toAmountInt, fromAmountInt } from '../../../utils/money';
 
 const { findById, findRawById, create, update, remove } = ExpensesQueries;
 
 const PAID_SUM = `COALESCE(SUM(p.base_amount) FILTER (WHERE p.deleted_at IS NULL), 0)`;
 
 export class ExpensesRepository implements IExpensesRepository {
+    private mapRow(row: ExpenseRow): ExpenseRow {
+        const bCcy = row.base_currency;
+        const repCcy = row.reporting_currency_code;
+        return {
+            ...row,
+            planned_amount: row.planned_amount != null ? fromAmountInt(Number(row.planned_amount), bCcy) : null,
+            actual_amount: row.actual_amount != null ? fromAmountInt(Number(row.actual_amount), bCcy) : null,
+            refundable_amount: fromAmountInt(Number(row.refundable_amount ?? 0), bCcy),
+            reporting_amount:
+                row.reporting_amount != null && repCcy != null
+                    ? fromAmountInt(Number(row.reporting_amount), repCcy)
+                    : null,
+            total_paid: fromAmountInt(Number(row.total_paid ?? 0), bCcy),
+            balance: fromAmountInt(Number(row.balance ?? 0), bCcy),
+        };
+    }
+
     async findAll(userId: string, filters: ListExpensesValidator): Promise<{ rows: ExpenseRow[]; total: number }> {
         const params: (string | number | null)[] = [userId];
         const where: string[] = ['e.user_id = $1'];
@@ -60,18 +82,34 @@ export class ExpensesRepository implements IExpensesRepository {
         `;
 
         type Row = ExpenseRow & { total_count: string };
-        const rows = await dbQuery.manyOrNone<Row>(sql, params) ?? [];
+        const rows = (await dbQuery.manyOrNone<Row>(sql, params)) ?? [];
         const total = rows.length ? parseInt(rows[0].total_count, 10) : 0;
 
-        return { rows, total };
+        return { rows: rows.map((r) => this.mapRow(r)), total };
     }
 
     async findById(id: string, userId: string): Promise<ExpenseDetail | null> {
-        return dbQuery.oneOrNone<ExpenseDetail>(findById, [id, userId]);
+        const row = await dbQuery.oneOrNone<ExpenseDetail>(findById, [id, userId]);
+        if (!row) return null;
+        const expense = this.mapRow(row) as ExpenseDetail;
+        if (Array.isArray(expense.payments)) {
+            const baseCcy = expense.base_currency;
+            expense.payments = expense.payments.map((p: any) => ({
+                ...p,
+                wallet_amount: fromAmountInt(Number(p.wallet_amount), p.wallet_currency_code ?? baseCcy),
+                base_amount: fromAmountInt(Number(p.base_amount), baseCcy),
+                reporting_amount:
+                    p.reporting_amount != null && p.reporting_currency_code
+                        ? fromAmountInt(Number(p.reporting_amount), p.reporting_currency_code)
+                        : null,
+            }));
+        }
+        return expense;
     }
 
     async findRawById(id: string, userId: string): Promise<ExpenseRow | null> {
-        return dbQuery.oneOrNone<ExpenseRow>(findRawById, [id, userId]);
+        const row = await dbQuery.oneOrNone<ExpenseRow>(findRawById, [id, userId]);
+        return row ? this.mapRow(row) : null;
     }
 
     async create(
@@ -82,21 +120,24 @@ export class ExpensesRepository implements IExpensesRepository {
         reportingCurrencyCode: string | null,
         reportingAmount: number | null,
     ): Promise<ExpenseRow> {
+        const baseCcy = (data.base_currency ?? 'NGN').toUpperCase();
         const { id } = await dbQuery.one<{ id: string }>(create, [
             userId,
             resolvedCategoryId,
             resolvedVendorId,
             data.event_id,
             data.name,
-            data.planned_amount ?? null,
-            data.actual_amount ?? null,
-            data.base_currency ?? 'NGN',
-            data.refundable_amount ?? 0,
+            data.planned_amount != null ? toAmountInt(data.planned_amount, baseCcy) : null,
+            data.actual_amount != null ? toAmountInt(data.actual_amount, baseCcy) : null,
+            baseCcy,
+            toAmountInt(data.refundable_amount ?? 0, baseCcy),
             data.is_planned ?? false,
             data.payment_deadline ?? null,
             data.notes ?? null,
             reportingCurrencyCode,
-            reportingAmount,
+            reportingAmount != null && reportingCurrencyCode
+                ? toAmountInt(reportingAmount, reportingCurrencyCode)
+                : null,
         ]);
 
         return this.findRawById(id, userId) as Promise<ExpenseRow>;
@@ -119,21 +160,42 @@ export class ExpensesRepository implements IExpensesRepository {
             refundedAt = null;
         }
 
+        const baseCcy = (data.base_currency ?? existing.base_currency).toUpperCase();
+        const repCcy = reportingCurrencyCode !== undefined ? reportingCurrencyCode : existing.reporting_currency_code;
+
+        // Convert major-unit values → minor units for storage
+        const toInt = (val: number | null | undefined): number | null =>
+            val != null ? toAmountInt(val, baseCcy) : null;
+
+        const storedReportingAmount =
+            reportingAmount !== undefined
+                ? reportingAmount != null && repCcy
+                    ? toAmountInt(reportingAmount, repCcy)
+                    : null
+                : existing.reporting_amount != null && existing.reporting_currency_code != null
+                  ? toAmountInt(existing.reporting_amount, existing.reporting_currency_code)
+                  : null;
+
         await dbQuery.manyOrNone(update, [
-            data.name                     ?? existing.name,
-            data.event_id                 ?? existing.event_id,
-            data.category_id              ?? existing.category_id,
-            'vendor_id' in data           ? (data.vendor_id ?? null) : existing.vendor_id,
-            'planned_amount' in data      ? (data.planned_amount ?? null) : existing.planned_amount,
-            'actual_amount'  in data      ? (data.actual_amount  ?? null) : existing.actual_amount,
-            data.is_planned               ?? existing.is_planned,
-            'notes' in data               ? (data.notes ?? null) : existing.notes,
-            data.refundable_amount        ?? existing.refundable_amount,
+            data.name ?? existing.name,
+            baseCcy,
+            data.event_id ?? existing.event_id,
+            data.category_id ?? existing.category_id,
+            'vendor_id' in data ? (data.vendor_id ?? null) : existing.vendor_id,
+            toInt('planned_amount' in data ? data.planned_amount : existing.planned_amount),
+            toInt('actual_amount' in data ? data.actual_amount : existing.actual_amount),
+            data.is_planned ?? existing.is_planned,
+            'notes' in data ? (data.notes ?? null) : existing.notes,
+            toAmountInt(data.refundable_amount ?? existing.refundable_amount ?? 0, baseCcy),
             isRefunded,
             refundedAt ? refundedAt.toISOString() : null,
-            'payment_deadline' in data    ? (data.payment_deadline ?? null) : (existing.payment_deadline ? existing.payment_deadline.toISOString().split('T')[0] : null),
-            reportingCurrencyCode !== undefined ? reportingCurrencyCode : existing.reporting_currency_code,
-            reportingAmount !== undefined ? reportingAmount : existing.reporting_amount,
+            'payment_deadline' in data
+                ? (data.payment_deadline ?? null)
+                : existing.payment_deadline
+                  ? existing.payment_deadline.toISOString().split('T')[0]
+                  : null,
+            repCcy,
+            storedReportingAmount,
             id,
             userId,
         ]);

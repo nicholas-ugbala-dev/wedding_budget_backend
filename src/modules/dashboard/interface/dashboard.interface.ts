@@ -25,12 +25,7 @@ export interface PaymentProgressItem {
 }
 
 export type NeedsAttentionBadge =
-    | 'missing_info'
-    | 'no_vendor'
-    | 'unconfirmed'
-    | 'pending_refund'
-    | 'unpaid'
-    | 'balance_due';
+    'missing_info' | 'no_vendor' | 'unconfirmed' | 'pending_refund' | 'unpaid' | 'balance_due';
 
 export interface NeedsAttentionItem {
     expense_id: string;

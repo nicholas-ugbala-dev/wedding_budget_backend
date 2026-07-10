@@ -10,7 +10,7 @@ export interface UserCurrency {
 
 export interface ClientCurrency {
     id: string;
-    user_id: string;    // = client_id
+    user_id: string; // = client_id
     currency_code: string;
     is_base: boolean;
     created_at: Date;

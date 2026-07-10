@@ -1,18 +1,17 @@
-import { Request, Response, NextFunction } from "express";
-import { StatusCodes } from "http-status-codes";
-import { ResponseHandler } from "../../utils/helpers/response.handler";
-import { IAuthService } from "./interface/auth.interface";
-import authService from "./auth.service";
+import { Request, Response, NextFunction } from 'express';
+import { StatusCodes } from 'http-status-codes';
+import { ResponseHandler } from '../../utils/helpers/response.handler';
+import { IAuthService } from './interface/auth.interface';
+import authService from './auth.service';
 import {
-  RegisterValidator,
-  LoginValidator,
-  OnboardingValidator,
-  OnboardingEventsValidator,
-  OnboardingCurrenciesValidator,
-  ForgotPasswordValidator,
-  ResetPasswordValidator,
-} from "./validation/auth.validations";
-
+    RegisterValidator,
+    LoginValidator,
+    OnboardingValidator,
+    OnboardingEventsValidator,
+    OnboardingCurrenciesValidator,
+    ForgotPasswordValidator,
+    ResetPasswordValidator,
+} from './validation/auth.validations';
 
 export class AuthController {
     constructor(private readonly authService: IAuthService) {}
@@ -21,13 +20,13 @@ export class AuthController {
         const data = req.body as RegisterValidator;
 
         const result = await this.authService.register(data);
-        
+
         const response = new ResponseHandler(req, res);
         response.success({
-            message: "Account created successfully",
+            message: 'Account created successfully',
             code: StatusCodes.CREATED,
             data: result,
-        })
+        });
     };
 
     login = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
@@ -37,89 +36,89 @@ export class AuthController {
 
         const response = new ResponseHandler(req, res);
         response.success({
-            message: "Login Successful",
+            message: 'Login Successful',
             code: StatusCodes.OK,
             data: result,
         });
     };
 
-     me = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userId = req.user?.id;
+    me = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+        const userId = req.user?.id;
 
-    const result = await this.authService.me(userId as string);
+        const result = await this.authService.me(userId as string);
 
-    const response = new ResponseHandler(req, res);
-    response.success({
-      message: 'User fetched successfully',
-      code: StatusCodes.OK,
-      data: result,
-    });
-  };
+        const response = new ResponseHandler(req, res);
+        response.success({
+            message: 'User fetched successfully',
+            code: StatusCodes.OK,
+            data: result,
+        });
+    };
 
-  updateOnboarding = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userId = req.user?.id;
-    const data = req.body as OnboardingValidator;
+    updateOnboarding = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+        const userId = req.user?.id;
+        const data = req.body as OnboardingValidator;
 
-    const result = await this.authService.updateOnboarding(userId as string, data);
+        const result = await this.authService.updateOnboarding(userId as string, data);
 
-    const response = new ResponseHandler(req, res);
-    response.success({
-      message: 'Onboarding completed successfully',
-      code: StatusCodes.OK,
-      data: result,
-    });
-  };
+        const response = new ResponseHandler(req, res);
+        response.success({
+            message: 'Onboarding completed successfully',
+            code: StatusCodes.OK,
+            data: result,
+        });
+    };
 
-  forgotPassword = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
-    const { email } = req.body as ForgotPasswordValidator;
+    forgotPassword = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+        const { email } = req.body as ForgotPasswordValidator;
 
-    await this.authService.forgotPassword(email);
+        await this.authService.forgotPassword(email);
 
-    const response = new ResponseHandler(req, res);
+        const response = new ResponseHandler(req, res);
 
-    response.success({
-      message: "If an account exists with this email, a reset link has ben sent",
-      code: StatusCodes.OK,
-    });
-  }
+        response.success({
+            message: 'If an account exists with this email, a reset link has ben sent',
+            code: StatusCodes.OK,
+        });
+    };
 
-  saveOnboardingEvents = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
-    const userId = req.user?.id as string;
-    const data = req.body as OnboardingEventsValidator;
+    saveOnboardingEvents = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+        const userId = req.user?.id as string;
+        const data = req.body as OnboardingEventsValidator;
 
-    await this.authService.saveOnboardingEvents(userId, data);
+        await this.authService.saveOnboardingEvents(userId, data);
 
-    const response = new ResponseHandler(req, res);
-    response.success({
-      message: "Events saved successfully",
-      code: StatusCodes.OK,
-    });
-  };
+        const response = new ResponseHandler(req, res);
+        response.success({
+            message: 'Events saved successfully',
+            code: StatusCodes.OK,
+        });
+    };
 
-  saveOnboardingCurrencies = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
-    const userId = req.user?.id as string;
-    const data = req.body as OnboardingCurrenciesValidator;
+    saveOnboardingCurrencies = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+        const userId = req.user?.id as string;
+        const data = req.body as OnboardingCurrenciesValidator;
 
-    await this.authService.saveOnboardingCurrencies(userId, data);
+        await this.authService.saveOnboardingCurrencies(userId, data);
 
-    const response = new ResponseHandler(req, res);
-    response.success({
-      message: "Currencies saved successfully",
-      code: StatusCodes.OK,
-    });
-  };
+        const response = new ResponseHandler(req, res);
+        response.success({
+            message: 'Currencies saved successfully',
+            code: StatusCodes.OK,
+        });
+    };
 
-  resetPassword = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
-    const { token, new_password } = req.body as ResetPasswordValidator;
+    resetPassword = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+        const { token, new_password } = req.body as ResetPasswordValidator;
 
-    await this.authService.resetPassword(token, new_password);
-    const response = new ResponseHandler(req, res);
+        await this.authService.resetPassword(token, new_password);
+        const response = new ResponseHandler(req, res);
 
-    response.success({
-      message: "Password reset successfully",
-      code: StatusCodes.OK,
-    });
-  };
+        response.success({
+            message: 'Password reset successfully',
+            code: StatusCodes.OK,
+        });
+    };
 }
 
 export const authController = new AuthController(authService);

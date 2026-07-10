@@ -1,16 +1,16 @@
 import { z } from 'zod';
 
 export const createVendorValidator = z.object({
-    name: z.string().min(1, "Vendor name is required").max(100),
+    name: z.string().min(1, 'Vendor name is required').max(100),
     phone: z.string().max(50).optional(),
-    email: z.email("Invalid email address").optional(),
+    email: z.email('Invalid email address').optional(),
     website: z.string().max(100).optional(),
 });
 
 export const updateVendorValidator = z.object({
-    name: z.string().min(1, "Vendor name is required").max(100).optional(),
+    name: z.string().min(1, 'Vendor name is required').max(100).optional(),
     phone: z.string().max(50).optional().nullable(),
-    email: z.email("Invalid email address").optional().nullable(),
+    email: z.email('Invalid email address').optional().nullable(),
     website: z.string().max(100).optional().nullable(),
 });
 

@@ -1,4 +1,4 @@
-import { User, SafeUser } from "../../../config/database/models";
+import { User, SafeUser } from '../../../config/database/models';
 import {
     RegisterValidator,
     LoginValidator,
@@ -6,7 +6,7 @@ import {
     OnboardingEventsValidator,
     OnboardingCurrenciesValidator,
     UpdateProfileValidator,
-} from "../validation/auth.validations";
+} from '../validation/auth.validations';
 
 export interface AuthTokenPayload {
     id: string;

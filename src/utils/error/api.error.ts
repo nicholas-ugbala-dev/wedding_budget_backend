@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { success, ZodError } from 'zod';
+import { ZodError } from 'zod';
 import { StatusCodes } from 'http-status-codes';
 import { logger } from '../../lib/logger';
-
 
 export class ApiError extends Error {
     public readonly statusCode: number;
@@ -15,22 +14,15 @@ export class ApiError extends Error {
         Object.setPrototypeOf(this, ApiError.prototype);
     }
 
-    static appError(
-        err: unknown,
-        _req: Request,
-        res: Response,
-        next: NextFunction
-    ): void {
+    static appError(err: unknown, _req: Request, res: Response, next: NextFunction): void {
         if (err instanceof ZodError) {
             const { message } = err;
             res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
                 success: false,
                 message: 'Validation failed',
-                errors: JSON.parse(message)
-                .map(
-                    (err: {message: string, path: string}) => 
-                    `${err.path}: ${err.message} \n`
-                )
+                errors: JSON.parse(message).map(
+                    (err: { message: string; path: string }) => `${err.path}: ${err.message} \n`,
+                ),
             });
             return;
         }
@@ -45,12 +37,7 @@ export class ApiError extends Error {
         next(err);
     }
 
-    static genericError(
-        err: unknown,
-        _req: Request,
-        res: Response,
-        _next: NextFunction
-    ): void {
+    static genericError(err: unknown, _req: Request, res: Response, _next: NextFunction): void {
         logger.error('Unhandled error', { error: err instanceof Error ? err.message : err });
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,

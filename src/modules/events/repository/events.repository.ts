@@ -17,30 +17,41 @@ export class EventsRepository implements IEventsRepository {
         return dbQuery.oneOrNone<Event>(findById, [id, userId]);
     }
 
-    async create(userId: string, data: CreateEventValidator, reportingCurrencyCode: string | null, reportingBudget: number | null): Promise<Event> {
+    async create(
+        userId: string,
+        data: CreateEventValidator,
+        reportingCurrencyCode: string | null,
+        reportingBudget: number | null,
+    ): Promise<Event> {
         return dbQuery.one<Event>(create, [
             userId,
             data.name,
-            data.event_type      ?? null,
-            data.date            ?? null,
-            data.location        ?? null,
+            data.event_type ?? null,
+            data.date ?? null,
+            data.location ?? null,
             data.vendor_currency ?? null,
-            data.budget          ?? null,
-            data.client_id       ?? null,
+            data.budget ?? null,
+            data.client_id ?? null,
             reportingCurrencyCode,
             reportingBudget,
         ]);
     }
 
-    async update(id: string, userId: string, data: UpdateEventValidator, reportingCurrencyCode: string | null, reportingBudget: number | null): Promise<Event> {
+    async update(
+        id: string,
+        userId: string,
+        data: UpdateEventValidator,
+        reportingCurrencyCode: string | null,
+        reportingBudget: number | null,
+    ): Promise<Event> {
         return dbQuery.one<Event>(update, [
-            data.name            ?? null,
-            data.event_type      ?? null,
-            data.date            ?? null,
-            data.location        ?? null,
+            data.name ?? null,
+            data.event_type ?? null,
+            data.date ?? null,
+            data.location ?? null,
             data.vendor_currency ?? null,
-            data.budget          ?? null,
-            data.client_id       ?? null,
+            data.budget ?? null,
+            data.client_id ?? null,
             reportingCurrencyCode,
             reportingBudget,
             id,

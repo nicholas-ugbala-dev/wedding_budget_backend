@@ -12,17 +12,9 @@ router.use(tokenGuard);
 
 router.get('/', tryCatch(eventsController.list));
 
-router.post(
-    '/',
-    validateRequest(createEventValidator),
-    tryCatch(eventsController.create),
-);
+router.post('/', validateRequest(createEventValidator), tryCatch(eventsController.create));
 
-router.patch(
-    '/:id',
-    validateRequest(updateEventValidator),
-    tryCatch(eventsController.update),
-);
+router.patch('/:id', validateRequest(updateEventValidator), tryCatch(eventsController.update));
 
 router.delete('/:id', tryCatch(eventsController.delete));
 

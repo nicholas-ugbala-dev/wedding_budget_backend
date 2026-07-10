@@ -11,4 +11,4 @@ export interface User {
     updated_at: Date;
 }
 
-export type SafeUser = Omit<User, 'password'>
+export type SafeUser = Omit<User, 'password'>;

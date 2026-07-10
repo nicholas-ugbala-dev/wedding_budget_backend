@@ -14,23 +14,11 @@ const router = Router();
 
 router.use(tokenGuard);
 
-router.get(
-    '/',
-    validateRequest(listCategoriesValidator),
-    tryCatch(categoriesController.list),
-);
+router.get('/', validateRequest(listCategoriesValidator), tryCatch(categoriesController.list));
 
-router.post(
-    '/',
-    validateRequest(createCategoryValidator),
-    tryCatch(categoriesController.create),
-);
+router.post('/', validateRequest(createCategoryValidator), tryCatch(categoriesController.create));
 
-router.patch(
-    '/:id',
-    validateRequest(updateCategoryValidator),
-    tryCatch(categoriesController.update),
-);
+router.patch('/:id', validateRequest(updateCategoryValidator), tryCatch(categoriesController.update));
 
 router.delete('/:id', tryCatch(categoriesController.delete));
 

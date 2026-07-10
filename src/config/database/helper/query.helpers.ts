@@ -5,15 +5,11 @@ import { ApiError } from '../../../utils/error';
 type QueryParams = (string | number | boolean | null)[];
 
 export const dbQuery = {
-    one: async <T extends QueryResultRow>(
-        query: string,
-        params: QueryParams,
-        client?: PoolClient
-    ): Promise<T> => {
+    one: async <T extends QueryResultRow>(query: string, params: QueryParams, client?: PoolClient): Promise<T> => {
         const db: Pool | PoolClient = client || pool;
         const result: QueryResult<T> = await db.query<T>(query, params);
         if (!result.rows[0]) {
-            throw new ApiError(404, "Record not found");
+            throw new ApiError(404, 'Record not found');
         }
         return result.rows[0];
     },
@@ -21,22 +17,18 @@ export const dbQuery = {
     oneOrNone: async <T extends QueryResultRow>(
         query: string,
         params: QueryParams,
-        client?: PoolClient
+        client?: PoolClient,
     ): Promise<T | null> => {
         const db: Pool | PoolClient = client || pool;
         const result: QueryResult<T> = await db.query<T>(query, params);
         return result.rows[0] || null;
     },
 
-    many: async <T extends QueryResultRow>(
-        query: string,
-        params: QueryParams,
-        client?: PoolClient
-    ): Promise<T[]> => {
+    many: async <T extends QueryResultRow>(query: string, params: QueryParams, client?: PoolClient): Promise<T[]> => {
         const db: Pool | PoolClient = client || pool;
         const result: QueryResult<T> = await db.query<T>(query, params);
         if (result.rows.length === 0) {
-            throw new ApiError(404, "Records not found");
+            throw new ApiError(404, 'Records not found');
         }
         return result.rows;
     },
@@ -44,7 +36,7 @@ export const dbQuery = {
     manyOrNone: async <T extends QueryResultRow>(
         query: string,
         params: QueryParams,
-        client?: PoolClient
+        client?: PoolClient,
     ): Promise<T[] | null> => {
         const db: Pool | PoolClient = client || pool;
         const result: QueryResult<T> = await db.query(query, params);
@@ -53,7 +45,7 @@ export const dbQuery = {
 
     transaction: async <T>(fn: (client: PoolClient) => Promise<T>): Promise<T> => {
         const client = await pool.connect();
-        try{
+        try {
             await client.query('BEGIN');
             const result = await fn(client);
             await client.query('COMMIT');

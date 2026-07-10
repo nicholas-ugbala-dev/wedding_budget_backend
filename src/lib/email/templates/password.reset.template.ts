@@ -25,4 +25,4 @@ export const passwordResetTemplate = (firstName: string, resetUrl: string): stri
             Or copy this link: ${resetUrl}
         </p>
     </div>
-`
+`;

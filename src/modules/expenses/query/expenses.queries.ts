@@ -101,27 +101,28 @@ const create = `
 `;
 
 // Full replace — service merges patch with existing before calling
-// $1=name $2=event_id $3=category_id $4=vendor_id $5=planned_amount
-// $6=actual_amount $7=is_planned $8=notes $9=refundable_amount $10=is_refunded $11=refunded_at
-// $12=payment_deadline $13=reporting_currency_code $14=reporting_amount $15=id $16=user_id
+// $1=name $2=base_currency $3=event_id $4=category_id $5=vendor_id $6=planned_amount
+// $7=actual_amount $8=is_planned $9=notes $10=refundable_amount $11=is_refunded $12=refunded_at
+// $13=payment_deadline $14=reporting_currency_code $15=reporting_amount $16=id $17=user_id
 const update = `
     UPDATE expenses
     SET
         name                    = $1,
-        event_id                = $2,
-        category_id             = $3,
-        vendor_id               = $4,
-        planned_amount          = $5,
-        actual_amount           = $6,
-        is_planned              = $7,
-        notes                   = $8,
-        refundable_amount       = $9,
-        is_refunded             = $10,
-        refunded_at             = $11,
-        payment_deadline        = $12,
-        reporting_currency_code = $13,
-        reporting_amount        = $14
-    WHERE id = $15 AND user_id = $16
+        base_currency           = $2,
+        event_id                = $3,
+        category_id             = $4,
+        vendor_id               = $5,
+        planned_amount          = $6,
+        actual_amount           = $7,
+        is_planned              = $8,
+        notes                   = $9,
+        refundable_amount       = $10,
+        is_refunded             = $11,
+        refunded_at             = $12,
+        payment_deadline        = $13,
+        reporting_currency_code = $14,
+        reporting_amount        = $15
+    WHERE id = $16 AND user_id = $17
 `;
 
 const remove = `

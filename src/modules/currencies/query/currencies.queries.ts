@@ -63,8 +63,16 @@ const insertClientBaseWallet = `
 const deleteClientCurrencies = `DELETE FROM client_currencies WHERE client_id = $1`;
 
 const CurrenciesQueries = {
-    findAll, findById, findByCode, add, remove, upsertUserCurrency,
-    findByClientId, upsertClientCurrency, insertClientBaseWallet, deleteClientCurrencies,
+    findAll,
+    findById,
+    findByCode,
+    add,
+    remove,
+    upsertUserCurrency,
+    findByClientId,
+    upsertClientCurrency,
+    insertClientBaseWallet,
+    deleteClientCurrencies,
 };
 
 export default CurrenciesQueries;

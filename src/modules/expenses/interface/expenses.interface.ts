@@ -1,5 +1,9 @@
 import { Payment } from '../../../config/database/models';
-import { CreateExpenseValidator, UpdateExpenseValidator, ListExpensesValidator } from '../validation/expenses.validations';
+import {
+    CreateExpenseValidator,
+    UpdateExpenseValidator,
+    ListExpensesValidator,
+} from '../validation/expenses.validations';
 import { PaginatedResult } from '../../../utils/helpers/pagination.helper';
 
 export type ExpenseStatus = 'unpaid' | 'partial' | 'paid';
@@ -49,7 +53,14 @@ export interface IExpensesRepository {
         reportingCurrencyCode: string | null,
         reportingAmount: number | null,
     ): Promise<ExpenseRow>;
-    update(id: string, userId: string, data: UpdateExpenseValidator, existing: ExpenseRow, reportingCurrencyCode: string | null | undefined, reportingAmount: number | null | undefined): Promise<ExpenseRow>;
+    update(
+        id: string,
+        userId: string,
+        data: UpdateExpenseValidator,
+        existing: ExpenseRow,
+        reportingCurrencyCode: string | null | undefined,
+        reportingAmount: number | null | undefined,
+    ): Promise<ExpenseRow>;
     delete(id: string, userId: string): Promise<void>;
 }
 

@@ -12,17 +12,9 @@ router.use(tokenGuard);
 
 router.get('/', tryCatch(clientsController.list));
 
-router.post(
-    '/',
-    validateRequest(createClientValidator),
-    tryCatch(clientsController.create),
-);
+router.post('/', validateRequest(createClientValidator), tryCatch(clientsController.create));
 
-router.patch(
-    '/:id',
-    validateRequest(updateClientValidator),
-    tryCatch(clientsController.update),
-);
+router.patch('/:id', validateRequest(updateClientValidator), tryCatch(clientsController.update));
 
 router.delete('/:id', tryCatch(clientsController.delete));
 

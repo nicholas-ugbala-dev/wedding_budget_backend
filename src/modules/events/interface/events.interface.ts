@@ -18,8 +18,19 @@ export interface Event {
 export interface IEventsRepository {
     findAll(userId: string, clientId?: string): Promise<Event[]>;
     findById(id: string, userId: string): Promise<Event | null>;
-    create(userId: string, data: CreateEventValidator, reportingCurrencyCode: string | null, reportingBudget: number | null): Promise<Event>;
-    update(id: string, userId: string, data: UpdateEventValidator, reportingCurrencyCode: string | null, reportingBudget: number | null): Promise<Event>;
+    create(
+        userId: string,
+        data: CreateEventValidator,
+        reportingCurrencyCode: string | null,
+        reportingBudget: number | null,
+    ): Promise<Event>;
+    update(
+        id: string,
+        userId: string,
+        data: UpdateEventValidator,
+        reportingCurrencyCode: string | null,
+        reportingBudget: number | null,
+    ): Promise<Event>;
     delete(id: string, userId: string): Promise<void>;
 }
 

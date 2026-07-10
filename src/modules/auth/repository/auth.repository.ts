@@ -1,9 +1,9 @@
 import crypto from 'crypto';
-import AuthQueries from "../query/auth.queries";
-import { User, SafeUser } from "../../../config/database/models";
-import { RegisterValidator, OnboardingValidator, UpdateProfileValidator } from "../validation/auth.validations";
-import { IAuthRepository, ResetTokenRow } from "../interface/auth.interface";
-import { dbQuery } from "../../../config/database/helper/query.helpers";
+import AuthQueries from '../query/auth.queries';
+import { User, SafeUser } from '../../../config/database/models';
+import { RegisterValidator, OnboardingValidator, UpdateProfileValidator } from '../validation/auth.validations';
+import { IAuthRepository, ResetTokenRow } from '../interface/auth.interface';
+import { dbQuery } from '../../../config/database/helper/query.helpers';
 
 const {
     register,
@@ -37,7 +37,7 @@ export class AuthRepository implements IAuthRepository {
         await dbQuery.manyOrNone(insertBaseWallet, [result.id, 'NGN']);
 
         return result;
-    };
+    }
 
     async findByEmail(email: string): Promise<User | null> {
         const result: User | null = await dbQuery.oneOrNone(findByEmail, [email]);
@@ -57,21 +57,18 @@ export class AuthRepository implements IAuthRepository {
     }
 
     async saveOnboardingEvents(userId: string, events: string[]): Promise<void> {
-        await dbQuery.manyOrNone(bulkInsertEvents(events.length), [
-            userId,
-            ...events,
-        ]);
+        await dbQuery.manyOrNone(bulkInsertEvents(events.length), [userId, ...events]);
     }
 
     async saveOnboardingCurrencies(userId: string, currencies: string[]): Promise<void> {
         if (currencies.length === 0) return;
         await dbQuery.manyOrNone(bulkInsertCurrencies(currencies.length), [
             userId,
-            ...currencies.map(c => c.toUpperCase()),
+            ...currencies.map((c) => c.toUpperCase()),
         ]);
     }
 
-    async createResetToken(userId: string, ): Promise<string> {
+    async createResetToken(userId: string): Promise<string> {
         const token = crypto.randomBytes(32).toString('hex');
         await dbQuery.one(createResetToken, [userId, token]);
 
@@ -91,11 +88,7 @@ export class AuthRepository implements IAuthRepository {
     }
 
     async updateProfile(userId: string, data: UpdateProfileValidator): Promise<SafeUser> {
-        return dbQuery.one<SafeUser>(updateProfile, [
-            data.first_name ?? null,
-            data.last_name  ?? null,
-            userId,
-        ]);
+        return dbQuery.one<SafeUser>(updateProfile, [data.first_name ?? null, data.last_name ?? null, userId]);
     }
 }
 

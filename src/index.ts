@@ -2,9 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { ApiError } from './utils/error';
-import v1Router from './routes/v1'
-import { logger } from './lib/logger'
-import { httpLogger } from './lib/logger/http'
+import v1Router from './routes/v1';
+import { logger } from './lib/logger';
+import { httpLogger } from './lib/logger/http';
 
 dotenv.config();
 
@@ -12,10 +12,12 @@ const app = express();
 
 const PORT = process.env.PORT || 8000;
 
-app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-    credentials: true,
-}))
+app.use(
+    cors({
+        origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+        credentials: true,
+    }),
+);
 
 app.use(express.json());
 app.use(httpLogger);
@@ -28,11 +30,10 @@ app.use('/api/v1', v1Router);
 
 // error middleware
 app.use(ApiError.appError);
-app.use(ApiError.genericError)
+app.use(ApiError.genericError);
 
 app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);
 });
-
 
 export default app;

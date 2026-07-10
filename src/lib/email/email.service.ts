@@ -4,11 +4,7 @@ import { passwordResetTemplate } from './templates';
 const resend = new Resend(process.env.RESEND_API_KEY);
 console.log('Resend API Key:', process.env.RESEND_API_KEY ? 'loaded' : 'missing');
 
-export const sendPasswordResetEmail = async (
-    email: string,
-    firstName: string,
-    resetToken: string
-): Promise<void> => {
+export const sendPasswordResetEmail = async (email: string, firstName: string, resetToken: string): Promise<void> => {
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
     const toEmail = process.env.RESEND_TEST_EMAIL ?? email;
@@ -17,7 +13,7 @@ export const sendPasswordResetEmail = async (
         from: process.env.RESEND_FROM_EMAIL as string,
         to: toEmail,
         subject: 'Reset your password - Kosi & Muna',
-        html: passwordResetTemplate(firstName, resetUrl)
+        html: passwordResetTemplate(firstName, resetUrl),
     });
 
     if (error) {
@@ -26,4 +22,4 @@ export const sendPasswordResetEmail = async (
     }
 
     console.log('Email sent:', data);
-}
+};

@@ -17,7 +17,7 @@ export class ClientsRepository implements IClientsRepository {
         params.push((page - 1) * limit);
 
         type Row = Client & { total_count: string };
-        const rows = await dbQuery.manyOrNone<Row>(ClientsQueries.findAll(hasSearch), params) ?? [];
+        const rows = (await dbQuery.manyOrNone<Row>(ClientsQueries.findAll(hasSearch), params)) ?? [];
         const total = rows.length ? parseInt(rows[0].total_count, 10) : 0;
 
         return { rows, total };
@@ -28,18 +28,13 @@ export class ClientsRepository implements IClientsRepository {
     }
 
     async create(userId: string, data: CreateClientValidator): Promise<Client> {
-        return dbQuery.one<Client>(create, [
-            userId,
-            data.first_name,
-            data.last_name,
-            data.currency_code,
-        ]);
+        return dbQuery.one<Client>(create, [userId, data.first_name, data.last_name, data.currency_code]);
     }
 
     async update(id: string, userId: string, data: UpdateClientValidator): Promise<Client> {
         return dbQuery.one<Client>(update, [
-            data.first_name    ?? null,
-            data.last_name     ?? null,
+            data.first_name ?? null,
+            data.last_name ?? null,
             data.currency_code ?? null,
             id,
             userId,

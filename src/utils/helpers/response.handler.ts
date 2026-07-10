@@ -15,8 +15,8 @@ interface FailOptions {
 export class ResponseHandler {
     constructor(
         private readonly req: Request,
-        private readonly res: Response
-    ){}
+        private readonly res: Response,
+    ) {}
 
     success({ message, code, data }: SuccessOptions) {
         return this.res.status(code).json({
@@ -33,6 +33,6 @@ export class ResponseHandler {
             message,
             url: this.req.originalUrl,
             data: data ?? null,
-        })
+        });
     }
 }

@@ -12,11 +12,7 @@ router.use(tokenGuard);
 
 router.get('/', tryCatch(currenciesController.list));
 
-router.post(
-    '/',
-    validateRequest(addCurrencyValidator),
-    tryCatch(currenciesController.add),
-);
+router.post('/', validateRequest(addCurrencyValidator), tryCatch(currenciesController.add));
 
 router.delete('/:code', tryCatch(currenciesController.remove));
 

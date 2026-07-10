@@ -5,7 +5,6 @@ import eventsRepository from './repository/events.repository';
 import clientsRepository from '../clients/repository/clients.repository';
 import currenciesService from '../currencies/currencies.service';
 import authRepository from '../auth/repository/auth.repository';
-import { getRate } from '../../utils/exchange-rate';
 
 export class EventsService implements IEventsService {
     constructor(private readonly repository: IEventsRepository) {}
@@ -19,12 +18,16 @@ export class EventsService implements IEventsService {
         return results ?? [];
     }
 
-    private async deriveReportingBudget(userId: string, clientId: string | null | undefined, budget: number | null | undefined): Promise<{ reportingCurrencyCode: string | null; reportingBudget: number | null }> {
+    private async deriveReportingBudget(
+        userId: string,
+        clientId: string | null | undefined,
+        budget: number | null | undefined,
+    ): Promise<{ reportingCurrencyCode: string | null; reportingBudget: number | null }> {
         if (budget == null) return { reportingCurrencyCode: null, reportingBudget: null };
 
         const user = await authRepository.findById(userId);
         const reportingCurrency = clientId
-            ? (await clientsRepository.findById(clientId, userId))?.currency_code ?? user!.base_currency
+            ? ((await clientsRepository.findById(clientId, userId))?.currency_code ?? user!.base_currency)
             : user!.base_currency;
 
         // Budget is entered by the user in their own reporting currency — no conversion needed
@@ -37,7 +40,11 @@ export class EventsService implements IEventsService {
             if (!client) throw new ApiError(403, 'Client not found or access denied');
         }
 
-        const { reportingCurrencyCode, reportingBudget } = await this.deriveReportingBudget(userId, data.client_id, data.budget);
+        const { reportingCurrencyCode, reportingBudget } = await this.deriveReportingBudget(
+            userId,
+            data.client_id,
+            data.budget,
+        );
         const event = await this.repository.create(userId, data, reportingCurrencyCode, reportingBudget);
 
         if (event.vendor_currency) {

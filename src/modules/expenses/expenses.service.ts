@@ -1,13 +1,16 @@
 import { ApiError } from '../../utils/error';
 import { IExpensesService, IExpensesRepository, ExpenseRow, ExpenseDetail } from './interface/expenses.interface';
-import { CreateExpenseValidator, UpdateExpenseValidator, ListExpensesValidator } from './validation/expenses.validations';
+import {
+    CreateExpenseValidator,
+    UpdateExpenseValidator,
+    ListExpensesValidator,
+} from './validation/expenses.validations';
 import { paginate, PaginatedResult } from '../../utils/helpers/pagination.helper';
 import expensesRepository from './repository/expenses.repository';
 import vendorsRepository from '../vendors/repository/vendors.repository';
 import categoriesRepository from '../categories/repository/categories.repository';
 import eventsRepository from '../events/repository/events.repository';
 import clientsRepository from '../clients/repository/clients.repository';
-import currenciesRepository from '../currencies/repository/currencies.repository';
 import authRepository from '../auth/repository/auth.repository';
 import { getRate } from '../../utils/exchange-rate';
 
@@ -73,7 +76,7 @@ export class ExpensesService implements IExpensesService {
         if (data.actual_amount != null) {
             const user = await authRepository.findById(userId);
             const reportingCurrency = event.client_id
-                ? (await clientsRepository.findById(event.client_id, userId))?.currency_code ?? user!.base_currency
+                ? ((await clientsRepository.findById(event.client_id, userId))?.currency_code ?? user!.base_currency)
                 : user!.base_currency;
 
             const baseCurrency = (data.base_currency as string | undefined) ?? event.vendor_currency ?? 'NGN';
@@ -84,7 +87,7 @@ export class ExpensesService implements IExpensesService {
             } else {
                 const liveRate = await getRate(baseCurrency, reportingCurrency);
                 if (liveRate != null) {
-                    reportingAmount = Math.round(data.actual_amount * liveRate);
+                    reportingAmount = data.actual_amount * liveRate;
                     reportingCurrencyCode = reportingCurrency;
                 }
             }
@@ -103,25 +106,34 @@ export class ExpensesService implements IExpensesService {
             if (!event) throw new ApiError(404, 'Event not found');
         }
 
-        // Recalculate reporting_amount when actual_amount changes
+        // Lock base_currency and actual_amount once payments have been recorded
+        const hasPayments = Number(existing.total_paid) > 0;
+        if (hasPayments && ('actual_amount' in data || 'base_currency' in data)) {
+            throw new ApiError(400, 'Amount and currency cannot be changed after a payment has been recorded');
+        }
+
+        // Recalculate reporting_amount when actual_amount or base_currency changes
         let reportingCurrencyCode: string | null | undefined = undefined;
         let reportingAmount: number | null | undefined = undefined;
 
-        if ('actual_amount' in data) {
-            const newActualAmount = data.actual_amount ?? null;
+        if ('actual_amount' in data || 'base_currency' in data) {
+            const newActualAmount = 'actual_amount' in data ? (data.actual_amount ?? null) : existing.actual_amount;
+            const newBaseCurrency = data.base_currency ?? existing.base_currency;
+
             if (newActualAmount != null) {
                 const user = await authRepository.findById(userId);
                 const reportingCurrency = existing.client_id
-                    ? (await clientsRepository.findById(existing.client_id, userId))?.currency_code ?? user!.base_currency
+                    ? ((await clientsRepository.findById(existing.client_id, userId))?.currency_code ??
+                      user!.base_currency)
                     : user!.base_currency;
 
-                if (existing.base_currency === reportingCurrency) {
+                if (newBaseCurrency === reportingCurrency) {
                     reportingAmount = newActualAmount;
                     reportingCurrencyCode = reportingCurrency;
                 } else {
-                    const liveRate = await getRate(existing.base_currency, reportingCurrency);
+                    const liveRate = await getRate(newBaseCurrency, reportingCurrency);
                     if (liveRate != null) {
-                        reportingAmount = Math.round(newActualAmount * liveRate);
+                        reportingAmount = newActualAmount * liveRate;
                         reportingCurrencyCode = reportingCurrency;
                     }
                 }

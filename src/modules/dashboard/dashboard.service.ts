@@ -38,13 +38,13 @@ export class DashboardService implements IDashboardService {
 
         return {
             kpis,
-            bar_chart: categories.map(c => ({
+            bar_chart: categories.map((c) => ({
                 category: c.category,
                 actual_amount: c.actual_amount,
                 planned_amount: c.planned_amount,
                 total_paid: c.total_paid,
             })),
-            donut_chart: categories.map(c => ({
+            donut_chart: categories.map((c) => ({
                 category: c.category,
                 amount: c.actual_amount,
                 pct: c.pct,

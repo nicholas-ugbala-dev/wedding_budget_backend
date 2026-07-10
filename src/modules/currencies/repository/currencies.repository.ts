@@ -4,8 +4,16 @@ import { AddCurrencyValidator } from '../validation/currencies.validations';
 import CurrenciesQueries from '../query/currencies.queries';
 
 const {
-    findAll, findById, findByCode, add, remove, upsertUserCurrency,
-    findByClientId, upsertClientCurrency, insertClientBaseWallet, deleteClientCurrencies,
+    findAll,
+    findById,
+    findByCode,
+    add,
+    remove,
+    upsertUserCurrency,
+    findByClientId,
+    upsertClientCurrency,
+    insertClientBaseWallet,
+    deleteClientCurrencies,
 } = CurrenciesQueries;
 
 export class CurrenciesRepository implements ICurrenciesRepository {

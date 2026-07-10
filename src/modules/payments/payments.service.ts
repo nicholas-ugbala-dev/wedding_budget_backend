@@ -1,6 +1,10 @@
 import { ApiError } from '../../utils/error';
 import { IPaymentsService, IPaymentsRepository, PaymentRow, PaymentSummary } from './interface/payments.interface';
-import { CreatePaymentValidator, ListPaymentsValidator, UpdatePaymentValidator } from './validation/payments.validations';
+import {
+    CreatePaymentValidator,
+    ListPaymentsValidator,
+    UpdatePaymentValidator,
+} from './validation/payments.validations';
 import { paginate, PaginatedResult } from '../../utils/helpers/pagination.helper';
 import paymentsRepository from './repository/payments.repository';
 import expensesRepository from '../expenses/repository/expenses.repository';
@@ -8,6 +12,7 @@ import currenciesRepository from '../currencies/repository/currencies.repository
 import authRepository from '../auth/repository/auth.repository';
 import clientsRepository from '../clients/repository/clients.repository';
 import { getRate } from '../../utils/exchange-rate';
+import { fromAmountInt } from '../../utils/money';
 
 export class PaymentsService implements IPaymentsService {
     constructor(private readonly repository: IPaymentsRepository) {}
@@ -18,7 +23,16 @@ export class PaymentsService implements IPaymentsService {
     }
 
     async summary(userId: string, eventId?: string, clientId?: string): Promise<PaymentSummary> {
-        return this.repository.getSummary(userId, eventId, clientId);
+        const raw = await this.repository.getSummary(userId, eventId, clientId);
+        const user = await authRepository.findById(userId);
+        const reportingCurrency = clientId
+            ? ((await clientsRepository.findById(clientId, userId))?.currency_code ?? user!.base_currency)
+            : user!.base_currency;
+        return {
+            ...raw,
+            total_paid: fromAmountInt(raw.total_paid, reportingCurrency),
+            outstanding: fromAmountInt(raw.outstanding, reportingCurrency),
+        };
     }
 
     async create(expenseId: string, userId: string, data: CreatePaymentValidator): Promise<PaymentRow> {
@@ -53,7 +67,7 @@ export class PaymentsService implements IPaymentsService {
         // Derive reporting_amount: convert base_amount to the user/client's reporting currency
         const user = await authRepository.findById(userId);
         const reportingCurrency = expense.client_id
-            ? (await clientsRepository.findById(expense.client_id, userId))?.currency_code ?? user!.base_currency
+            ? ((await clientsRepository.findById(expense.client_id, userId))?.currency_code ?? user!.base_currency)
             : user!.base_currency;
 
         let reportingAmount: number | null = null;
@@ -68,12 +82,22 @@ export class PaymentsService implements IPaymentsService {
         } else {
             const liveRate = await getRate(expense.base_currency, reportingCurrency);
             if (liveRate != null) {
-                reportingAmount = Math.round(resolvedBaseAmount * liveRate);
+                reportingAmount = resolvedBaseAmount * liveRate;
                 reportingCurrencyCode = reportingCurrency;
             }
         }
 
-        return this.repository.create(expenseId, userId, data, walletCurrencyCode, resolvedBaseAmount, resolvedExchangeRate, reportingCurrencyCode, reportingAmount);
+        return this.repository.create(
+            expenseId,
+            userId,
+            data,
+            walletCurrencyCode,
+            expense.base_currency,
+            resolvedBaseAmount,
+            resolvedExchangeRate,
+            reportingCurrencyCode,
+            reportingAmount,
+        );
     }
 
     async update(id: string, expenseId: string, userId: string, data: UpdatePaymentValidator): Promise<PaymentRow> {
@@ -91,7 +115,10 @@ export class PaymentsService implements IPaymentsService {
             walletCurrencyCode = userCurrency.currency_code;
             const isSameCurrency = walletCurrencyCode === expense.base_currency;
             if (!isSameCurrency && !data.exchange_rate && !data.base_amount) {
-                throw new ApiError(400, 'exchange_rate and base_amount are required when switching to a foreign currency wallet');
+                throw new ApiError(
+                    400,
+                    'exchange_rate and base_amount are required when switching to a foreign currency wallet',
+                );
             }
         } else if (data.wallet_currency_code !== undefined) {
             walletCurrencyCode = data.wallet_currency_code.toUpperCase();
@@ -105,13 +132,13 @@ export class PaymentsService implements IPaymentsService {
         let reportingCurrencyCode: string | null | undefined = undefined;
         let reportingAmount: number | null | undefined = undefined;
 
-        const amountOrCurrencyChanged = data.base_amount !== undefined || data.wallet_amount !== undefined
-            || walletCurrencyCode !== undefined;
+        const amountOrCurrencyChanged =
+            data.base_amount !== undefined || data.wallet_amount !== undefined || walletCurrencyCode !== undefined;
 
         if (amountOrCurrencyChanged) {
             const user = await authRepository.findById(userId);
             const reportingCurrency = expense.client_id
-                ? (await clientsRepository.findById(expense.client_id, userId))?.currency_code ?? user!.base_currency
+                ? ((await clientsRepository.findById(expense.client_id, userId))?.currency_code ?? user!.base_currency)
                 : user!.base_currency;
 
             const effectiveBaseAmount = data.base_amount ?? Number(payment.base_amount);
@@ -127,13 +154,22 @@ export class PaymentsService implements IPaymentsService {
             } else {
                 const liveRate = await getRate(expense.base_currency, reportingCurrency);
                 if (liveRate != null) {
-                    reportingAmount = Math.round(effectiveBaseAmount * liveRate);
+                    reportingAmount = effectiveBaseAmount * liveRate;
                     reportingCurrencyCode = reportingCurrency;
                 }
             }
         }
 
-        return this.repository.update(id, expenseId, userId, data, walletCurrencyCode, reportingCurrencyCode, reportingAmount);
+        return this.repository.update(
+            id,
+            expenseId,
+            userId,
+            data,
+            walletCurrencyCode,
+            expense.base_currency,
+            reportingCurrencyCode,
+            reportingAmount,
+        );
     }
 
     async delete(id: string, expenseId: string, userId: string): Promise<void> {

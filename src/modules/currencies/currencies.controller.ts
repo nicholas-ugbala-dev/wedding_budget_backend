@@ -12,9 +12,7 @@ export class CurrenciesController {
         const userId = req.user?.id as string;
         const { client_id } = listCurrenciesValidator.parse(req.query);
 
-        const data = client_id
-            ? await this.service.listForClient(userId, client_id)
-            : await this.service.list(userId);
+        const data = client_id ? await this.service.listForClient(userId, client_id) : await this.service.list(userId);
 
         new ResponseHandler(req, res).success({
             message: 'Currencies fetched successfully',

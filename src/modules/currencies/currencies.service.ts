@@ -1,5 +1,10 @@
 import { ApiError } from '../../utils/error';
-import { ICurrenciesService, ICurrenciesRepository, UserCurrency, ClientCurrency } from './interface/currencies.interface';
+import {
+    ICurrenciesService,
+    ICurrenciesRepository,
+    UserCurrency,
+    ClientCurrency,
+} from './interface/currencies.interface';
 import { AddCurrencyValidator } from './validation/currencies.validations';
 import currenciesRepository from './repository/currencies.repository';
 import clientsRepository from '../clients/repository/clients.repository';

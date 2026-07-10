@@ -4,68 +4,48 @@ import { ValidationMiddleware } from '../../middleware/validation.middleware';
 import { tokenGuard } from '../../middleware/auth.middleware';
 import { tryCatch } from '../../utils/error';
 import {
-  registerValidator,
-  loginValidator,
-  onboardingValidator,
-  onboardingEventsValidator,
-  onboardingCurrenciesValidator,
-  resetPasswordValidator,
-  forgotPasswordValidator,
+    registerValidator,
+    loginValidator,
+    onboardingValidator,
+    onboardingEventsValidator,
+    onboardingCurrenciesValidator,
+    resetPasswordValidator,
+    forgotPasswordValidator,
 } from './validation/auth.validations';
 
 const { validateRequest } = ValidationMiddleware;
 
 const router = Router();
 
-router.post(
-  '/register',
-  validateRequest(registerValidator),
-  tryCatch(authController.register),
-);
+router.post('/register', validateRequest(registerValidator), tryCatch(authController.register));
 
-router.post(
-  '/login',
-  validateRequest(loginValidator),
-  tryCatch(authController.login),
-);
+router.post('/login', validateRequest(loginValidator), tryCatch(authController.login));
 
-router.get(
-  '/me',
-  tokenGuard,
-  tryCatch(authController.me),
-);
+router.get('/me', tokenGuard, tryCatch(authController.me));
 
 router.patch(
-  '/onboarding',
-  tokenGuard,
-  validateRequest(onboardingValidator),
-  tryCatch(authController.updateOnboarding),
+    '/onboarding',
+    tokenGuard,
+    validateRequest(onboardingValidator),
+    tryCatch(authController.updateOnboarding),
 );
 
 router.post(
-  '/onboarding/events',
-  tokenGuard,
-  validateRequest(onboardingEventsValidator),
-  tryCatch(authController.saveOnboardingEvents),
+    '/onboarding/events',
+    tokenGuard,
+    validateRequest(onboardingEventsValidator),
+    tryCatch(authController.saveOnboardingEvents),
 );
 
 router.post(
-  '/onboarding/currencies',
-  tokenGuard,
-  validateRequest(onboardingCurrenciesValidator),
-  tryCatch(authController.saveOnboardingCurrencies),
+    '/onboarding/currencies',
+    tokenGuard,
+    validateRequest(onboardingCurrenciesValidator),
+    tryCatch(authController.saveOnboardingCurrencies),
 );
 
-router.post(
-  '/forgot-password',
-  validateRequest(forgotPasswordValidator),
-  tryCatch(authController.forgotPassword),
-);
+router.post('/forgot-password', validateRequest(forgotPasswordValidator), tryCatch(authController.forgotPassword));
 
-router.post(
-  '/reset-password',
-  validateRequest(resetPasswordValidator),
-  tryCatch(authController.resetPassword),
-);
+router.post('/reset-password', validateRequest(resetPasswordValidator), tryCatch(authController.resetPassword));
 
 export const authRouter = router;
