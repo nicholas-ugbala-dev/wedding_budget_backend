@@ -156,6 +156,7 @@ export class ExpensesRepository implements IExpensesRepository {
         existing: ExpenseRow,
         reportingCurrencyCode: string | null | undefined,
         reportingAmount: number | null | undefined,
+        resolvedVendorId: string | null | undefined,
         client?: PoolClient,
     ): Promise<ExpenseRow> {
         const isRefunded = data.is_refunded ?? existing.is_refunded;
@@ -190,7 +191,7 @@ export class ExpensesRepository implements IExpensesRepository {
                 baseCcy,
                 data.event_id ?? existing.event_id,
                 data.category_id ?? existing.category_id,
-                'vendor_id' in data ? (data.vendor_id ?? null) : existing.vendor_id,
+                resolvedVendorId !== undefined ? resolvedVendorId : existing.vendor_id,
                 toInt('planned_amount' in data ? data.planned_amount : existing.planned_amount),
                 toInt('actual_amount' in data ? data.actual_amount : existing.actual_amount),
                 data.is_planned ?? existing.is_planned,

@@ -79,6 +79,7 @@ export interface IExpensesRepository {
         existing: ExpenseRow,
         reportingCurrencyCode: string | null | undefined,
         reportingAmount: number | null | undefined,
+        resolvedVendorId: string | null | undefined,
         client?: PoolClient,
     ): Promise<ExpenseRow>;
     delete(id: string, userId: string): Promise<void>;

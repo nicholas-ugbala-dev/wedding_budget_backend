@@ -162,17 +162,29 @@ export class ExpensesService implements IExpensesService {
         }
 
         return dbQuery.transaction(async (txClient) => {
-            // Resolve vendor from inline fields when no explicit vendor_id is supplied
-            if (!data.vendor_id && data.vendor_name) {
+            // Resolve vendor — same pattern as create(): explicit id wins, name triggers findOrCreate
+            let resolvedVendorId: string | null | undefined;
+            if (data.vendor_id !== undefined) {
+                resolvedVendorId = data.vendor_id ?? null;
+            } else if (data.vendor_name) {
                 const vendor = await vendorsRepository.findOrCreate(
                     userId,
                     { name: data.vendor_name, phone: data.vendor_phone, email: data.vendor_email },
                     txClient,
                 );
-                (data as Record<string, unknown>).vendor_id = vendor.id;
+                resolvedVendorId = vendor.id;
             }
 
-            return this.repository.update(id, userId, data, existing, reportingCurrencyCode, reportingAmount, txClient);
+            return this.repository.update(
+                id,
+                userId,
+                data,
+                existing,
+                reportingCurrencyCode,
+                reportingAmount,
+                resolvedVendorId,
+                txClient,
+            );
         });
     }
 
