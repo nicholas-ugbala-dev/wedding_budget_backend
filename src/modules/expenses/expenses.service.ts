@@ -108,8 +108,15 @@ export class ExpensesService implements IExpensesService {
 
         // Lock base_currency and actual_amount once payments have been recorded
         const hasPayments = Number(existing.total_paid) > 0;
-        if (hasPayments && ('actual_amount' in data || 'base_currency' in data)) {
-            throw new ApiError(400, 'Amount and currency cannot be changed after a payment has been recorded');
+        if (hasPayments) {
+            const amountChanged = 'actual_amount' in data && data.actual_amount !== existing.actual_amount;
+            const currencyChanged =
+                'base_currency' in data &&
+                data.base_currency != null &&
+                data.base_currency.toUpperCase() !== existing.base_currency.toUpperCase();
+            if (amountChanged || currencyChanged) {
+                throw new ApiError(400, 'Amount and currency cannot be changed after a payment has been recorded');
+            }
         }
 
         // Recalculate reporting_amount when actual_amount or base_currency changes

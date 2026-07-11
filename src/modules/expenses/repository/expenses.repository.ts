@@ -1,5 +1,5 @@
 import { dbQuery } from '../../../config/database/helper/query.helpers';
-import { IExpensesRepository, ExpenseRow, ExpenseDetail } from '../interface/expenses.interface';
+import { IExpensesRepository, ExpenseRow, ExpenseDetail, EmbeddedPayment } from '../interface/expenses.interface';
 import {
     CreateExpenseValidator,
     UpdateExpenseValidator,
@@ -94,7 +94,7 @@ export class ExpensesRepository implements IExpensesRepository {
         const expense = this.mapRow(row) as ExpenseDetail;
         if (Array.isArray(expense.payments)) {
             const baseCcy = expense.base_currency;
-            expense.payments = expense.payments.map((p: any) => ({
+            expense.payments = expense.payments.map((p: EmbeddedPayment) => ({
                 ...p,
                 wallet_amount: fromAmountInt(Number(p.wallet_amount), p.wallet_currency_code ?? baseCcy),
                 base_amount: fromAmountInt(Number(p.base_amount), baseCcy),

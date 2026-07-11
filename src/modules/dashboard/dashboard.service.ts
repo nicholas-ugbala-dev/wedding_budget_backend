@@ -53,26 +53,22 @@ export class DashboardService implements IDashboardService {
                   }
                 : EMPTY_KPIS;
 
-        const categories = (row.categories ?? []).map(
-            (c: RawCategoryBreakdown): CategoryBreakdown => ({
-                category: c.category,
-                actual_amount: conv(c.actual_amount),
-                planned_amount: c.planned_amount != null ? conv(c.planned_amount) : null,
-                total_paid: conv(c.total_paid),
-                pct: parseFloat(c.pct),
-            }),
-        );
+        const categories = (row.categories ?? []).map((c: RawCategoryBreakdown): CategoryBreakdown => ({
+            category: c.category,
+            actual_amount: conv(c.actual_amount),
+            planned_amount: c.planned_amount != null ? conv(c.planned_amount) : null,
+            total_paid: conv(c.total_paid),
+            pct: parseFloat(c.pct),
+        }));
 
-        const paymentProgress = (row.payment_progress ?? []).map(
-            (p: RawPaymentProgressItem): PaymentProgressItem => ({
-                expense_id: p.expense_id,
-                name: p.name,
-                actual_amount: conv(p.actual_amount),
-                total_paid: conv(p.total_paid),
-                balance: conv(p.balance),
-                pct: parseFloat(p.pct),
-            }),
-        );
+        const paymentProgress = (row.payment_progress ?? []).map((p: RawPaymentProgressItem): PaymentProgressItem => ({
+            expense_id: p.expense_id,
+            name: p.name,
+            actual_amount: conv(p.actual_amount),
+            total_paid: conv(p.total_paid),
+            balance: conv(p.balance),
+            pct: parseFloat(p.pct),
+        }));
 
         return {
             kpis,

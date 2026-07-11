@@ -10,11 +10,13 @@
     "migrate:up": "db-migrate up",
     "migrate:down": "db-migrate down",
     "migrate:create": "db-migrate create",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write src/",
     "format:check": "prettier --check src/",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
@@ -45,6 +47,7 @@
     "@types/pg": "^8.20.0",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
     "prettier": "^3.9.5",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",

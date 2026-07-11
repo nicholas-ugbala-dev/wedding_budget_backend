@@ -1,4 +1,3 @@
-import { Payment } from '../../../config/database/models';
 import {
     CreateExpenseValidator,
     UpdateExpenseValidator,
@@ -37,8 +36,26 @@ export interface ExpenseRow {
     updated_at: Date;
 }
 
+// Shape of each payment as returned by the JSON aggregate in the findById query
+export interface EmbeddedPayment {
+    id: string;
+    expense_id: string;
+    payment_type: string;
+    user_currency_id: string | null;
+    wallet_currency_code: string;
+    wallet_amount: number;
+    exchange_rate: number | null;
+    base_amount: number;
+    reporting_currency_code: string | null;
+    reporting_amount: number | null;
+    payment_date: Date;
+    notes: string | null;
+    created_at: Date;
+    updated_at: Date;
+}
+
 export interface ExpenseDetail extends ExpenseRow {
-    payments: Payment[];
+    payments: EmbeddedPayment[];
 }
 
 export interface IExpensesRepository {
