@@ -1,3 +1,4 @@
+import type { PoolClient } from 'pg';
 import { CreateEventValidator, UpdateEventValidator } from '../validation/events.validations';
 
 export interface Event {
@@ -23,6 +24,7 @@ export interface IEventsRepository {
         data: CreateEventValidator,
         reportingCurrencyCode: string | null,
         reportingBudget: number | null,
+        client?: PoolClient,
     ): Promise<Event>;
     update(
         id: string,
@@ -30,6 +32,7 @@ export interface IEventsRepository {
         data: UpdateEventValidator,
         reportingCurrencyCode: string | null,
         reportingBudget: number | null,
+        client?: PoolClient,
     ): Promise<Event>;
     delete(id: string, userId: string): Promise<void>;
 }

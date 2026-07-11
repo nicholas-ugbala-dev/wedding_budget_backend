@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import AuthQueries from '../query/auth.queries';
 import { User, SafeUser } from '../../../config/database/models';
 import { RegisterValidator, OnboardingValidator, UpdateProfileValidator } from '../validation/auth.validations';
+import type { PoolClient } from 'pg';
 import { IAuthRepository, ResetTokenRow } from '../interface/auth.interface';
 import { dbQuery } from '../../../config/database/helper/query.helpers';
 
@@ -25,18 +26,15 @@ export class AuthRepository implements IAuthRepository {
     async register(data: RegisterValidator, hashedPassword: string): Promise<SafeUser> {
         const { first_name, last_name, email, account_type } = data;
 
-        const result: SafeUser = await dbQuery.one(register, [
-            first_name,
-            last_name,
-            email,
-            hashedPassword,
-            account_type,
-        ]);
-
-        // Seed default base wallet (NGN) — updated to the real currency during onboarding
-        await dbQuery.manyOrNone(insertBaseWallet, [result.id, 'NGN']);
-
-        return result;
+        return dbQuery.transaction(async (txClient) => {
+            const result: SafeUser = await dbQuery.one(
+                register,
+                [first_name, last_name, email, hashedPassword, account_type],
+                txClient,
+            );
+            await dbQuery.manyOrNone(insertBaseWallet, [result.id, 'NGN'], txClient);
+            return result;
+        });
     }
 
     async findByEmail(email: string): Promise<User | null> {
@@ -50,10 +48,11 @@ export class AuthRepository implements IAuthRepository {
     }
 
     async updateOnboarding(userId: string, data: OnboardingValidator): Promise<SafeUser> {
-        const result: SafeUser = await dbQuery.one(updateOnboarding, [data.base_currency, userId]);
-        // Swap the base wallet to the chosen currency
-        await dbQuery.manyOrNone(updateBaseWallet, [userId, data.base_currency]);
-        return result;
+        return dbQuery.transaction(async (txClient) => {
+            const result: SafeUser = await dbQuery.one(updateOnboarding, [data.base_currency, userId], txClient);
+            await dbQuery.manyOrNone(updateBaseWallet, [userId, data.base_currency], txClient);
+            return result;
+        });
     }
 
     async saveOnboardingEvents(userId: string, events: string[]): Promise<void> {
@@ -79,12 +78,12 @@ export class AuthRepository implements IAuthRepository {
         return dbQuery.oneOrNone<ResetTokenRow>(findResetToken, [token]);
     }
 
-    async deleteResetToken(token: string): Promise<void> {
-        await dbQuery.one(deleteResetToken, [token]);
+    async deleteResetToken(token: string, client?: PoolClient): Promise<void> {
+        await dbQuery.one(deleteResetToken, [token], client);
     }
 
-    async updatePassword(userId: string, hashedPassword: string): Promise<void> {
-        await dbQuery.one(updatePassword, [hashedPassword, userId]);
+    async updatePassword(userId: string, hashedPassword: string, client?: PoolClient): Promise<void> {
+        await dbQuery.one(updatePassword, [hashedPassword, userId], client);
     }
 
     async updateProfile(userId: string, data: UpdateProfileValidator): Promise<SafeUser> {

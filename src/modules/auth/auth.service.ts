@@ -13,6 +13,7 @@ import authRepository from './repository/auth.repository';
 import { generateToken } from '../../utils/helpers/token.helper';
 import { SafeUser } from '../../config/database/models';
 import { sendPasswordResetEmail } from '../../lib/email/email.service';
+import { dbQuery } from '../../config/database/helper/query.helpers';
 
 export class AuthService implements IAuthService {
     constructor(private readonly authRepository: IAuthRepository) {}
@@ -93,8 +94,10 @@ export class AuthService implements IAuthService {
 
         const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-        await this.authRepository.updatePassword(resetToken.user_id, hashedPassword);
-        await this.authRepository.deleteResetToken(token);
+        await dbQuery.transaction(async (txClient) => {
+            await this.authRepository.updatePassword(resetToken.user_id, hashedPassword, txClient);
+            await this.authRepository.deleteResetToken(token, txClient);
+        });
     }
 
     async updateProfile(userId: string, data: UpdateProfileValidator) {

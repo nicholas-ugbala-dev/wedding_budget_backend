@@ -1,3 +1,4 @@
+import type { PoolClient } from 'pg';
 import { dbQuery } from '../../../config/database/helper/query.helpers';
 import { Vendor } from '../../../config/database/models';
 import { IVendorsRepository } from '../interface/vendors.interface';
@@ -15,24 +16,22 @@ export class VendorsRepository implements IVendorsRepository {
         return dbQuery.oneOrNone<Vendor>(findById, [id, userId]);
     }
 
-    async findByName(userId: string, name: string): Promise<Vendor | null> {
-        return dbQuery.oneOrNone<Vendor>(findByName, [userId, name]);
+    async findByName(userId: string, name: string, client?: PoolClient): Promise<Vendor | null> {
+        return dbQuery.oneOrNone<Vendor>(findByName, [userId, name], client);
     }
 
-    async create(userId: string, data: CreateVendorValidator): Promise<Vendor> {
-        return dbQuery.one<Vendor>(create, [
-            userId,
-            data.name,
-            data.phone ?? null,
-            data.email ?? null,
-            data.website ?? null,
-        ]);
+    async create(userId: string, data: CreateVendorValidator, client?: PoolClient): Promise<Vendor> {
+        return dbQuery.one<Vendor>(
+            create,
+            [userId, data.name, data.phone ?? null, data.email ?? null, data.website ?? null],
+            client,
+        );
     }
 
-    async findOrCreate(userId: string, data: CreateVendorValidator): Promise<Vendor> {
-        const existing = await this.findByName(userId, data.name);
+    async findOrCreate(userId: string, data: CreateVendorValidator, client?: PoolClient): Promise<Vendor> {
+        const existing = await this.findByName(userId, data.name, client);
         if (existing) return existing;
-        return this.create(userId, data);
+        return this.create(userId, data, client);
     }
 
     async update(id: string, userId: string, data: UpdateVendorValidator): Promise<Vendor> {

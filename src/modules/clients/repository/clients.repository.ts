@@ -1,3 +1,4 @@
+import type { PoolClient } from 'pg';
 import { dbQuery } from '../../../config/database/helper/query.helpers';
 import { IClientsRepository, Client } from '../interface/clients.interface';
 import { CreateClientValidator, UpdateClientValidator, ListClientsValidator } from '../validation/clients.validations';
@@ -27,18 +28,16 @@ export class ClientsRepository implements IClientsRepository {
         return dbQuery.oneOrNone<Client>(findById, [id, userId]);
     }
 
-    async create(userId: string, data: CreateClientValidator): Promise<Client> {
-        return dbQuery.one<Client>(create, [userId, data.first_name, data.last_name, data.currency_code]);
+    async create(userId: string, data: CreateClientValidator, client?: PoolClient): Promise<Client> {
+        return dbQuery.one<Client>(create, [userId, data.first_name, data.last_name, data.currency_code], client);
     }
 
-    async update(id: string, userId: string, data: UpdateClientValidator): Promise<Client> {
-        return dbQuery.one<Client>(update, [
-            data.first_name ?? null,
-            data.last_name ?? null,
-            data.currency_code ?? null,
-            id,
-            userId,
-        ]);
+    async update(id: string, userId: string, data: UpdateClientValidator, client?: PoolClient): Promise<Client> {
+        return dbQuery.one<Client>(
+            update,
+            [data.first_name ?? null, data.last_name ?? null, data.currency_code ?? null, id, userId],
+            client,
+        );
     }
 
     async delete(id: string, userId: string): Promise<void> {

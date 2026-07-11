@@ -1,3 +1,4 @@
+import type { PoolClient } from 'pg';
 import { AddCurrencyValidator } from '../validation/currencies.validations';
 
 export interface UserCurrency {
@@ -22,11 +23,11 @@ export interface ICurrenciesRepository {
     findByCode(userId: string, currencyCode: string): Promise<UserCurrency | null>;
     add(userId: string, data: AddCurrencyValidator): Promise<UserCurrency>;
     remove(userId: string, currencyCode: string): Promise<void>;
-    upsertUserCurrency(userId: string, currencyCode: string): Promise<void>;
+    upsertUserCurrency(userId: string, currencyCode: string, client?: PoolClient): Promise<void>;
     findByClientId(clientId: string, userId: string): Promise<ClientCurrency[]>;
-    upsertClientCurrency(clientId: string, currencyCode: string): Promise<void>;
-    insertClientBaseWallet(clientId: string, currencyCode: string): Promise<void>;
-    setClientCurrencies(clientId: string, codes: string[]): Promise<void>;
+    upsertClientCurrency(clientId: string, currencyCode: string, client?: PoolClient): Promise<void>;
+    insertClientBaseWallet(clientId: string, currencyCode: string, client?: PoolClient): Promise<void>;
+    setClientCurrencies(clientId: string, codes: string[], client?: PoolClient): Promise<void>;
 }
 
 export interface ICurrenciesService {
@@ -34,8 +35,8 @@ export interface ICurrenciesService {
     listForClient(userId: string, clientId: string): Promise<ClientCurrency[]>;
     add(userId: string, data: AddCurrencyValidator): Promise<UserCurrency>;
     remove(userId: string, currencyCode: string): Promise<void>;
-    upsertUserCurrency(userId: string, currencyCode: string): Promise<void>;
-    upsertClientCurrency(clientId: string, currencyCode: string): Promise<void>;
-    insertClientBaseWallet(clientId: string, currencyCode: string): Promise<void>;
-    setClientCurrencies(clientId: string, codes: string[]): Promise<void>;
+    upsertUserCurrency(userId: string, currencyCode: string, client?: PoolClient): Promise<void>;
+    upsertClientCurrency(clientId: string, currencyCode: string, client?: PoolClient): Promise<void>;
+    insertClientBaseWallet(clientId: string, currencyCode: string, client?: PoolClient): Promise<void>;
+    setClientCurrencies(clientId: string, codes: string[], client?: PoolClient): Promise<void>;
 }

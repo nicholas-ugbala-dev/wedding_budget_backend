@@ -13,6 +13,7 @@ import eventsRepository from '../events/repository/events.repository';
 import clientsRepository from '../clients/repository/clients.repository';
 import authRepository from '../auth/repository/auth.repository';
 import { getRate } from '../../utils/exchange-rate';
+import { dbQuery } from '../../config/database/helper/query.helpers';
 
 export class ExpensesService implements IExpensesService {
     constructor(private readonly repository: IExpensesRepository) {}
@@ -43,33 +44,7 @@ export class ExpensesService implements IExpensesService {
             }
         }
 
-        // Resolve category — prefer explicit id, otherwise findOrCreate by name
-        let categoryId: string;
-        if (data.category_id) {
-            const cat = await categoriesRepository.findById(data.category_id, userId);
-            if (!cat) throw new ApiError(404, 'Category not found');
-            categoryId = cat.id;
-        } else {
-            const cat = await categoriesRepository.findOrCreate(userId, data.category_name!);
-            categoryId = cat.id;
-        }
-
-        // Resolve vendor — prefer explicit id, otherwise findOrCreate by name if provided
-        let vendorId: string | null = null;
-        if (data.vendor_id) {
-            const vendor = await vendorsRepository.findById(data.vendor_id, userId);
-            if (!vendor) throw new ApiError(404, 'Vendor not found');
-            vendorId = vendor.id;
-        } else if (data.vendor_name) {
-            const vendor = await vendorsRepository.findOrCreate(userId, {
-                name: data.vendor_name,
-                phone: data.vendor_phone,
-                email: data.vendor_email,
-            });
-            vendorId = vendor.id;
-        }
-
-        // Derive reporting_amount for actual_amount
+        // Derive reporting_amount for actual_amount (reads only)
         let reportingCurrencyCode: string | null = null;
         let reportingAmount: number | null = null;
 
@@ -93,7 +68,43 @@ export class ExpensesService implements IExpensesService {
             }
         }
 
-        return this.repository.create(userId, data, categoryId, vendorId, reportingCurrencyCode, reportingAmount);
+        return dbQuery.transaction(async (txClient) => {
+            // Resolve category — prefer explicit id, otherwise findOrCreate by name
+            let categoryId: string;
+            if (data.category_id) {
+                const cat = await categoriesRepository.findById(data.category_id, userId);
+                if (!cat) throw new ApiError(404, 'Category not found');
+                categoryId = cat.id;
+            } else {
+                const cat = await categoriesRepository.findOrCreate(userId, data.category_name!, txClient);
+                categoryId = cat.id;
+            }
+
+            // Resolve vendor — prefer explicit id, otherwise findOrCreate by name if provided
+            let vendorId: string | null = null;
+            if (data.vendor_id) {
+                const vendor = await vendorsRepository.findById(data.vendor_id, userId);
+                if (!vendor) throw new ApiError(404, 'Vendor not found');
+                vendorId = vendor.id;
+            } else if (data.vendor_name) {
+                const vendor = await vendorsRepository.findOrCreate(
+                    userId,
+                    { name: data.vendor_name, phone: data.vendor_phone, email: data.vendor_email },
+                    txClient,
+                );
+                vendorId = vendor.id;
+            }
+
+            return this.repository.create(
+                userId,
+                data,
+                categoryId,
+                vendorId,
+                reportingCurrencyCode,
+                reportingAmount,
+                txClient,
+            );
+        });
     }
 
     async update(id: string, userId: string, data: UpdateExpenseValidator): Promise<ExpenseRow> {
@@ -150,7 +161,19 @@ export class ExpensesService implements IExpensesService {
             }
         }
 
-        return this.repository.update(id, userId, data, existing, reportingCurrencyCode, reportingAmount);
+        return dbQuery.transaction(async (txClient) => {
+            // Resolve vendor from inline fields when no explicit vendor_id is supplied
+            if (!data.vendor_id && data.vendor_name) {
+                const vendor = await vendorsRepository.findOrCreate(
+                    userId,
+                    { name: data.vendor_name, phone: data.vendor_phone, email: data.vendor_email },
+                    txClient,
+                );
+                (data as Record<string, unknown>).vendor_id = vendor.id;
+            }
+
+            return this.repository.update(id, userId, data, existing, reportingCurrencyCode, reportingAmount, txClient);
+        });
     }
 
     async delete(id: string, userId: string): Promise<void> {

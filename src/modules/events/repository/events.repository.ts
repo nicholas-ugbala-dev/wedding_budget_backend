@@ -1,3 +1,4 @@
+import type { PoolClient } from 'pg';
 import { dbQuery } from '../../../config/database/helper/query.helpers';
 import { IEventsRepository, Event } from '../interface/events.interface';
 import { CreateEventValidator, UpdateEventValidator } from '../validation/events.validations';
@@ -22,19 +23,24 @@ export class EventsRepository implements IEventsRepository {
         data: CreateEventValidator,
         reportingCurrencyCode: string | null,
         reportingBudget: number | null,
+        client?: PoolClient,
     ): Promise<Event> {
-        return dbQuery.one<Event>(create, [
-            userId,
-            data.name,
-            data.event_type ?? null,
-            data.date ?? null,
-            data.location ?? null,
-            data.vendor_currency ?? null,
-            data.budget ?? null,
-            data.client_id ?? null,
-            reportingCurrencyCode,
-            reportingBudget,
-        ]);
+        return dbQuery.one<Event>(
+            create,
+            [
+                userId,
+                data.name,
+                data.event_type ?? null,
+                data.date ?? null,
+                data.location ?? null,
+                data.vendor_currency ?? null,
+                data.budget ?? null,
+                data.client_id ?? null,
+                reportingCurrencyCode,
+                reportingBudget,
+            ],
+            client,
+        );
     }
 
     async update(
@@ -43,20 +49,25 @@ export class EventsRepository implements IEventsRepository {
         data: UpdateEventValidator,
         reportingCurrencyCode: string | null,
         reportingBudget: number | null,
+        client?: PoolClient,
     ): Promise<Event> {
-        return dbQuery.one<Event>(update, [
-            data.name ?? null,
-            data.event_type ?? null,
-            data.date ?? null,
-            data.location ?? null,
-            data.vendor_currency ?? null,
-            data.budget ?? null,
-            data.client_id ?? null,
-            reportingCurrencyCode,
-            reportingBudget,
-            id,
-            userId,
-        ]);
+        return dbQuery.one<Event>(
+            update,
+            [
+                data.name ?? null,
+                data.event_type ?? null,
+                data.date ?? null,
+                data.location ?? null,
+                data.vendor_currency ?? null,
+                data.budget ?? null,
+                data.client_id ?? null,
+                reportingCurrencyCode,
+                reportingBudget,
+                id,
+                userId,
+            ],
+            client,
+        );
     }
 
     async delete(id: string, userId: string): Promise<void> {

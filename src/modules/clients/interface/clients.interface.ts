@@ -1,3 +1,4 @@
+import type { PoolClient } from 'pg';
 import { CreateClientValidator, UpdateClientValidator, ListClientsValidator } from '../validation/clients.validations';
 import { PaginatedResult } from '../../../utils/helpers/pagination.helper';
 
@@ -14,8 +15,8 @@ export interface Client {
 export interface IClientsRepository {
     findAll(userId: string, filters: ListClientsValidator): Promise<{ rows: Client[]; total: number }>;
     findById(id: string, userId: string): Promise<Client | null>;
-    create(userId: string, data: CreateClientValidator): Promise<Client>;
-    update(id: string, userId: string, data: UpdateClientValidator): Promise<Client>;
+    create(userId: string, data: CreateClientValidator, client?: PoolClient): Promise<Client>;
+    update(id: string, userId: string, data: UpdateClientValidator, client?: PoolClient): Promise<Client>;
     delete(id: string, userId: string): Promise<void>;
 }
 

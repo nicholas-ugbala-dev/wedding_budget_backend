@@ -1,4 +1,5 @@
 import { ApiError } from '../../utils/error';
+import type { PoolClient } from 'pg';
 import {
     ICurrenciesService,
     ICurrenciesRepository,
@@ -38,20 +39,20 @@ export class CurrenciesService implements ICurrenciesService {
         await this.repository.remove(userId, currencyCode.toUpperCase());
     }
 
-    async upsertUserCurrency(userId: string, currencyCode: string): Promise<void> {
-        return this.repository.upsertUserCurrency(userId, currencyCode);
+    async upsertUserCurrency(userId: string, currencyCode: string, client?: PoolClient): Promise<void> {
+        return this.repository.upsertUserCurrency(userId, currencyCode, client);
     }
 
-    async upsertClientCurrency(clientId: string, currencyCode: string): Promise<void> {
-        return this.repository.upsertClientCurrency(clientId, currencyCode);
+    async upsertClientCurrency(clientId: string, currencyCode: string, client?: PoolClient): Promise<void> {
+        return this.repository.upsertClientCurrency(clientId, currencyCode, client);
     }
 
-    async insertClientBaseWallet(clientId: string, currencyCode: string): Promise<void> {
-        return this.repository.insertClientBaseWallet(clientId, currencyCode);
+    async insertClientBaseWallet(clientId: string, currencyCode: string, client?: PoolClient): Promise<void> {
+        return this.repository.insertClientBaseWallet(clientId, currencyCode, client);
     }
 
-    async setClientCurrencies(clientId: string, codes: string[]): Promise<void> {
-        return this.repository.setClientCurrencies(clientId, codes);
+    async setClientCurrencies(clientId: string, codes: string[], client?: PoolClient): Promise<void> {
+        return this.repository.setClientCurrencies(clientId, codes, client);
     }
 }
 

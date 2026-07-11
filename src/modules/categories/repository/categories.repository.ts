@@ -1,3 +1,4 @@
+import type { PoolClient } from 'pg';
 import { dbQuery } from '../../../config/database/helper/query.helpers';
 import { Category } from '../../../config/database/models';
 import { ICategoriesRepository } from '../interface/categories.interface';
@@ -15,18 +16,18 @@ export class CategoriesRepository implements ICategoriesRepository {
         return dbQuery.oneOrNone<Category>(findById, [id, userId]);
     }
 
-    async findByName(userId: string, name: string): Promise<Category | null> {
-        return dbQuery.oneOrNone<Category>(findByName, [userId, name]);
+    async findByName(userId: string, name: string, client?: PoolClient): Promise<Category | null> {
+        return dbQuery.oneOrNone<Category>(findByName, [userId, name], client);
     }
 
-    async create(userId: string, data: CreateCategoryValidator): Promise<Category> {
-        return dbQuery.one<Category>(create, [userId, data.name]);
+    async create(userId: string, data: CreateCategoryValidator, client?: PoolClient): Promise<Category> {
+        return dbQuery.one<Category>(create, [userId, data.name], client);
     }
 
-    async findOrCreate(userId: string, name: string): Promise<Category> {
-        const existing = await this.findByName(userId, name);
+    async findOrCreate(userId: string, name: string, client?: PoolClient): Promise<Category> {
+        const existing = await this.findByName(userId, name, client);
         if (existing) return existing;
-        return this.create(userId, { name });
+        return this.create(userId, { name }, client);
     }
 
     async update(id: string, userId: string, data: UpdateCategoryValidator): Promise<Category> {

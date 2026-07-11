@@ -4,6 +4,7 @@ import { CreateClientValidator, UpdateClientValidator, ListClientsValidator } fr
 import { paginate, PaginatedResult } from '../../utils/helpers/pagination.helper';
 import clientsRepository from './repository/clients.repository';
 import currenciesService from '../currencies/currencies.service';
+import { dbQuery } from '../../config/database/helper/query.helpers';
 
 export class ClientsService implements IClientsService {
     constructor(private readonly repository: IClientsRepository) {}
@@ -14,25 +15,30 @@ export class ClientsService implements IClientsService {
     }
 
     async create(userId: string, data: CreateClientValidator): Promise<Client> {
-        const client = await this.repository.create(userId, data);
-        await currenciesService.insertClientBaseWallet(client.id, data.currency_code);
-        if (data.extra_currencies?.length) {
-            await currenciesService.setClientCurrencies(client.id, data.extra_currencies);
-        }
-        return client;
+        return dbQuery.transaction(async (txClient) => {
+            const client = await this.repository.create(userId, data, txClient);
+            await currenciesService.insertClientBaseWallet(client.id, data.currency_code, txClient);
+            if (data.extra_currencies?.length) {
+                await currenciesService.setClientCurrencies(client.id, data.extra_currencies, txClient);
+            }
+            return client;
+        });
     }
 
     async update(id: string, userId: string, data: UpdateClientValidator): Promise<Client> {
         const existing = await this.repository.findById(id, userId);
         if (!existing) throw new ApiError(404, 'Client not found');
-        const client = await this.repository.update(id, userId, data);
-        if (data.currency_code) {
-            await currenciesService.insertClientBaseWallet(id, data.currency_code);
-        }
-        if (data.extra_currencies !== undefined) {
-            await currenciesService.setClientCurrencies(id, data.extra_currencies);
-        }
-        return client;
+
+        return dbQuery.transaction(async (txClient) => {
+            const client = await this.repository.update(id, userId, data, txClient);
+            if (data.currency_code) {
+                await currenciesService.insertClientBaseWallet(id, data.currency_code, txClient);
+            }
+            if (data.extra_currencies !== undefined) {
+                await currenciesService.setClientCurrencies(id, data.extra_currencies, txClient);
+            }
+            return client;
+        });
     }
 
     async delete(id: string, userId: string): Promise<void> {

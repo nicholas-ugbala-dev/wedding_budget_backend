@@ -1,3 +1,4 @@
+import type { PoolClient } from 'pg';
 import { User, SafeUser } from '../../../config/database/models';
 import {
     RegisterValidator,
@@ -35,8 +36,8 @@ export interface IAuthRepository {
     saveOnboardingCurrencies(userId: string, currencies: string[]): Promise<void>;
     createResetToken(userId: string): Promise<string>;
     findResetToken(token: string): Promise<ResetTokenRow | null>;
-    deleteResetToken(token: string): Promise<void>;
-    updatePassword(userId: string, hashedPassword: string): Promise<void>;
+    deleteResetToken(token: string, client?: PoolClient): Promise<void>;
+    updatePassword(userId: string, hashedPassword: string, client?: PoolClient): Promise<void>;
     updateProfile(userId: string, data: UpdateProfileValidator): Promise<SafeUser>;
 }
 

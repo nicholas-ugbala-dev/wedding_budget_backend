@@ -1,3 +1,4 @@
+import type { PoolClient } from 'pg';
 import {
     CreateExpenseValidator,
     UpdateExpenseValidator,
@@ -61,7 +62,7 @@ export interface ExpenseDetail extends ExpenseRow {
 export interface IExpensesRepository {
     findAll(userId: string, filters: ListExpensesValidator): Promise<{ rows: ExpenseRow[]; total: number }>;
     findById(id: string, userId: string): Promise<ExpenseDetail | null>;
-    findRawById(id: string, userId: string): Promise<ExpenseRow | null>;
+    findRawById(id: string, userId: string, client?: PoolClient): Promise<ExpenseRow | null>;
     create(
         userId: string,
         data: CreateExpenseValidator,
@@ -69,6 +70,7 @@ export interface IExpensesRepository {
         resolvedVendorId: string | null,
         reportingCurrencyCode: string | null,
         reportingAmount: number | null,
+        client?: PoolClient,
     ): Promise<ExpenseRow>;
     update(
         id: string,
@@ -77,6 +79,7 @@ export interface IExpensesRepository {
         existing: ExpenseRow,
         reportingCurrencyCode: string | null | undefined,
         reportingAmount: number | null | undefined,
+        client?: PoolClient,
     ): Promise<ExpenseRow>;
     delete(id: string, userId: string): Promise<void>;
 }

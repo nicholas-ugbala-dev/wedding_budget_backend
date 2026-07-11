@@ -5,6 +5,7 @@ import eventsRepository from './repository/events.repository';
 import clientsRepository from '../clients/repository/clients.repository';
 import currenciesService from '../currencies/currencies.service';
 import authRepository from '../auth/repository/auth.repository';
+import { dbQuery } from '../../config/database/helper/query.helpers';
 
 export class EventsService implements IEventsService {
     constructor(private readonly repository: IEventsRepository) {}
@@ -36,8 +37,8 @@ export class EventsService implements IEventsService {
 
     async create(userId: string, data: CreateEventValidator): Promise<Event> {
         if (data.client_id) {
-            const client = await clientsRepository.findById(data.client_id, userId);
-            if (!client) throw new ApiError(403, 'Client not found or access denied');
+            const clientRecord = await clientsRepository.findById(data.client_id, userId);
+            if (!clientRecord) throw new ApiError(403, 'Client not found or access denied');
         }
 
         const { reportingCurrencyCode, reportingBudget } = await this.deriveReportingBudget(
@@ -45,16 +46,19 @@ export class EventsService implements IEventsService {
             data.client_id,
             data.budget,
         );
-        const event = await this.repository.create(userId, data, reportingCurrencyCode, reportingBudget);
 
-        if (event.vendor_currency) {
-            if (event.client_id) {
-                await currenciesService.upsertClientCurrency(event.client_id, event.vendor_currency);
-            } else {
-                await currenciesService.upsertUserCurrency(userId, event.vendor_currency);
+        return dbQuery.transaction(async (txClient) => {
+            const event = await this.repository.create(userId, data, reportingCurrencyCode, reportingBudget, txClient);
+
+            if (event.vendor_currency) {
+                if (event.client_id) {
+                    await currenciesService.upsertClientCurrency(event.client_id, event.vendor_currency, txClient);
+                } else {
+                    await currenciesService.upsertUserCurrency(userId, event.vendor_currency, txClient);
+                }
             }
-        }
-        return event;
+            return event;
+        });
     }
 
     async update(id: string, userId: string, data: UpdateEventValidator): Promise<Event> {
@@ -65,16 +69,25 @@ export class EventsService implements IEventsService {
         const budget = data.budget !== undefined ? data.budget : existing.budget;
         const { reportingCurrencyCode, reportingBudget } = await this.deriveReportingBudget(userId, clientId, budget);
 
-        const event = await this.repository.update(id, userId, data, reportingCurrencyCode, reportingBudget);
+        return dbQuery.transaction(async (txClient) => {
+            const event = await this.repository.update(
+                id,
+                userId,
+                data,
+                reportingCurrencyCode,
+                reportingBudget,
+                txClient,
+            );
 
-        if (event.vendor_currency) {
-            if (event.client_id) {
-                await currenciesService.upsertClientCurrency(event.client_id, event.vendor_currency);
-            } else {
-                await currenciesService.upsertUserCurrency(userId, event.vendor_currency);
+            if (event.vendor_currency) {
+                if (event.client_id) {
+                    await currenciesService.upsertClientCurrency(event.client_id, event.vendor_currency, txClient);
+                } else {
+                    await currenciesService.upsertUserCurrency(userId, event.vendor_currency, txClient);
+                }
             }
-        }
-        return event;
+            return event;
+        });
     }
 
     async delete(id: string, userId: string): Promise<void> {

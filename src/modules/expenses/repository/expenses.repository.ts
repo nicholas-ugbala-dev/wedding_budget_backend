@@ -1,3 +1,4 @@
+import type { PoolClient } from 'pg';
 import { dbQuery } from '../../../config/database/helper/query.helpers';
 import { IExpensesRepository, ExpenseRow, ExpenseDetail, EmbeddedPayment } from '../interface/expenses.interface';
 import {
@@ -107,8 +108,8 @@ export class ExpensesRepository implements IExpensesRepository {
         return expense;
     }
 
-    async findRawById(id: string, userId: string): Promise<ExpenseRow | null> {
-        const row = await dbQuery.oneOrNone<ExpenseRow>(findRawById, [id, userId]);
+    async findRawById(id: string, userId: string, client?: PoolClient): Promise<ExpenseRow | null> {
+        const row = await dbQuery.oneOrNone<ExpenseRow>(findRawById, [id, userId], client);
         return row ? this.mapRow(row) : null;
     }
 
@@ -119,28 +120,33 @@ export class ExpensesRepository implements IExpensesRepository {
         resolvedVendorId: string | null,
         reportingCurrencyCode: string | null,
         reportingAmount: number | null,
+        client?: PoolClient,
     ): Promise<ExpenseRow> {
         const baseCcy = (data.base_currency ?? 'NGN').toUpperCase();
-        const { id } = await dbQuery.one<{ id: string }>(create, [
-            userId,
-            resolvedCategoryId,
-            resolvedVendorId,
-            data.event_id,
-            data.name,
-            data.planned_amount != null ? toAmountInt(data.planned_amount, baseCcy) : null,
-            data.actual_amount != null ? toAmountInt(data.actual_amount, baseCcy) : null,
-            baseCcy,
-            toAmountInt(data.refundable_amount ?? 0, baseCcy),
-            data.is_planned ?? false,
-            data.payment_deadline ?? null,
-            data.notes ?? null,
-            reportingCurrencyCode,
-            reportingAmount != null && reportingCurrencyCode
-                ? toAmountInt(reportingAmount, reportingCurrencyCode)
-                : null,
-        ]);
+        const { id } = await dbQuery.one<{ id: string }>(
+            create,
+            [
+                userId,
+                resolvedCategoryId,
+                resolvedVendorId,
+                data.event_id,
+                data.name,
+                data.planned_amount != null ? toAmountInt(data.planned_amount, baseCcy) : null,
+                data.actual_amount != null ? toAmountInt(data.actual_amount, baseCcy) : null,
+                baseCcy,
+                toAmountInt(data.refundable_amount ?? 0, baseCcy),
+                data.is_planned ?? false,
+                data.payment_deadline ?? null,
+                data.notes ?? null,
+                reportingCurrencyCode,
+                reportingAmount != null && reportingCurrencyCode
+                    ? toAmountInt(reportingAmount, reportingCurrencyCode)
+                    : null,
+            ],
+            client,
+        );
 
-        return this.findRawById(id, userId) as Promise<ExpenseRow>;
+        return this.findRawById(id, userId, client) as Promise<ExpenseRow>;
     }
 
     async update(
@@ -150,6 +156,7 @@ export class ExpensesRepository implements IExpensesRepository {
         existing: ExpenseRow,
         reportingCurrencyCode: string | null | undefined,
         reportingAmount: number | null | undefined,
+        client?: PoolClient,
     ): Promise<ExpenseRow> {
         const isRefunded = data.is_refunded ?? existing.is_refunded;
         const wasRefunded = existing.is_refunded;
@@ -176,31 +183,35 @@ export class ExpensesRepository implements IExpensesRepository {
                   ? toAmountInt(existing.reporting_amount, existing.reporting_currency_code)
                   : null;
 
-        await dbQuery.manyOrNone(update, [
-            data.name ?? existing.name,
-            baseCcy,
-            data.event_id ?? existing.event_id,
-            data.category_id ?? existing.category_id,
-            'vendor_id' in data ? (data.vendor_id ?? null) : existing.vendor_id,
-            toInt('planned_amount' in data ? data.planned_amount : existing.planned_amount),
-            toInt('actual_amount' in data ? data.actual_amount : existing.actual_amount),
-            data.is_planned ?? existing.is_planned,
-            'notes' in data ? (data.notes ?? null) : existing.notes,
-            toAmountInt(data.refundable_amount ?? existing.refundable_amount ?? 0, baseCcy),
-            isRefunded,
-            refundedAt ? refundedAt.toISOString() : null,
-            'payment_deadline' in data
-                ? (data.payment_deadline ?? null)
-                : existing.payment_deadline
-                  ? existing.payment_deadline.toISOString().split('T')[0]
-                  : null,
-            repCcy,
-            storedReportingAmount,
-            id,
-            userId,
-        ]);
+        await dbQuery.manyOrNone(
+            update,
+            [
+                data.name ?? existing.name,
+                baseCcy,
+                data.event_id ?? existing.event_id,
+                data.category_id ?? existing.category_id,
+                'vendor_id' in data ? (data.vendor_id ?? null) : existing.vendor_id,
+                toInt('planned_amount' in data ? data.planned_amount : existing.planned_amount),
+                toInt('actual_amount' in data ? data.actual_amount : existing.actual_amount),
+                data.is_planned ?? existing.is_planned,
+                'notes' in data ? (data.notes ?? null) : existing.notes,
+                toAmountInt(data.refundable_amount ?? existing.refundable_amount ?? 0, baseCcy),
+                isRefunded,
+                refundedAt ? refundedAt.toISOString() : null,
+                'payment_deadline' in data
+                    ? (data.payment_deadline ?? null)
+                    : existing.payment_deadline
+                      ? existing.payment_deadline.toISOString().split('T')[0]
+                      : null,
+                repCcy,
+                storedReportingAmount,
+                id,
+                userId,
+            ],
+            client,
+        );
 
-        return this.findRawById(id, userId) as Promise<ExpenseRow>;
+        return this.findRawById(id, userId, client) as Promise<ExpenseRow>;
     }
 
     async delete(id: string, userId: string): Promise<void> {

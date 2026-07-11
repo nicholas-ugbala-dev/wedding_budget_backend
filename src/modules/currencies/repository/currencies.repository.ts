@@ -1,3 +1,4 @@
+import type { PoolClient } from 'pg';
 import { dbQuery } from '../../../config/database/helper/query.helpers';
 import { ICurrenciesRepository, UserCurrency, ClientCurrency } from '../interface/currencies.interface';
 import { AddCurrencyValidator } from '../validation/currencies.validations';
@@ -41,22 +42,29 @@ export class CurrenciesRepository implements ICurrenciesRepository {
         return (await dbQuery.manyOrNone<ClientCurrency>(findByClientId, [clientId, userId])) ?? [];
     }
 
-    async upsertUserCurrency(userId: string, currencyCode: string): Promise<void> {
-        await dbQuery.manyOrNone(upsertUserCurrency, [userId, currencyCode.toUpperCase()]);
+    async upsertUserCurrency(userId: string, currencyCode: string, client?: PoolClient): Promise<void> {
+        await dbQuery.manyOrNone(upsertUserCurrency, [userId, currencyCode.toUpperCase()], client);
     }
 
-    async upsertClientCurrency(clientId: string, currencyCode: string): Promise<void> {
-        await dbQuery.manyOrNone(upsertClientCurrency, [clientId, currencyCode.toUpperCase()]);
+    async upsertClientCurrency(clientId: string, currencyCode: string, client?: PoolClient): Promise<void> {
+        await dbQuery.manyOrNone(upsertClientCurrency, [clientId, currencyCode.toUpperCase()], client);
     }
 
-    async insertClientBaseWallet(clientId: string, currencyCode: string): Promise<void> {
-        await dbQuery.manyOrNone(insertClientBaseWallet, [clientId, currencyCode.toUpperCase()]);
+    async insertClientBaseWallet(clientId: string, currencyCode: string, client?: PoolClient): Promise<void> {
+        await dbQuery.manyOrNone(insertClientBaseWallet, [clientId, currencyCode.toUpperCase()], client);
     }
 
-    async setClientCurrencies(clientId: string, codes: string[]): Promise<void> {
-        await dbQuery.manyOrNone(deleteClientCurrencies, [clientId]);
-        for (const code of codes) {
-            await dbQuery.manyOrNone(upsertClientCurrency, [clientId, code.toUpperCase()]);
+    async setClientCurrencies(clientId: string, codes: string[], client?: PoolClient): Promise<void> {
+        const run = async (c: PoolClient) => {
+            await dbQuery.manyOrNone(deleteClientCurrencies, [clientId], c);
+            for (const code of codes) {
+                await dbQuery.manyOrNone(upsertClientCurrency, [clientId, code.toUpperCase()], c);
+            }
+        };
+        if (client) {
+            await run(client);
+        } else {
+            await dbQuery.transaction(run);
         }
     }
 }
