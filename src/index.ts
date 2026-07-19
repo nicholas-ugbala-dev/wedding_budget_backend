@@ -22,7 +22,7 @@ app.use(
 app.use(express.json());
 app.use(httpLogger);
 
-app.get('/health', async (_req, res) => {
+app.get('/api/health', async (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
