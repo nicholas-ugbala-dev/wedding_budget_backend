@@ -16,8 +16,8 @@ services:
       POSTGRES_USER: plannerhub
       POSTGRES_PASSWORD: secure_password
 
-    -volumes:
-      postgres_data:/var/lib/postgresql/data
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
   
 volumes:
   postgres_data:
