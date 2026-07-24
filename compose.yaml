@@ -1,6 +1,7 @@
 services:
   backend:
     build: .
+    container_name: plannerhub-backend
     env_file:
       - .env
     ports:
@@ -11,6 +12,7 @@ services:
 
   postgres:
     image: postgres:17
+    container_name: plannerhub-db
 
     environment:
       POSTGRES_DB: plannerhub
