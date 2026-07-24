@@ -16,6 +16,8 @@ WORKDIR /app
 
 COPY package*.json ./
 
+ENV HUSKY=0
+
 RUN npm install --omit=dev
 
 COPY --from=builder /app/dist ./dist
