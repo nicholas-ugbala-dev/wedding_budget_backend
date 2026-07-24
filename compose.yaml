@@ -1,0 +1,23 @@
+services:
+  backend:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:17
+
+    environment:
+      POSTGRES_DB: plannerhub
+      POSTGRES_USER: plannerhub
+      POSTGRES_PASSWORD: secure_password
+
+    -volumes:
+      postgres_data:/var/lib/postgresql/data
+  
+volumes:
+  postgres_data:
