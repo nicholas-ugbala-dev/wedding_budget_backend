@@ -63,7 +63,7 @@ jobs:
               run: |
                 echo "Host exists: ${{ secrets.PI_HOST != '' }}"
                 echo "User exists: ${{ secrets.PI_USER != '' }}"
-                cho "Key exists: ${{ secrets.PI_SSH_PRIVATE_KEY != '' }}"
+                echo "Key exists: ${{ secrets.PI_SSH_PRIVATE_KEY != '' }}"
 
             - name: Configure SSH
               run: |
