@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-APP_DIR="$HOME/apps/wedding_budget_backend"
+APP_DIR="/home/sark/apps/wedding_budget_backend"
 HEALTHCHECK_URL="http://localhost:8000/api/health"
 MAX_RETRIES=30
 RETRY_INTERVAL=2

@@ -61,7 +61,7 @@ jobs:
         steps:
             - name: Deploy application
               run: |
-                  "cd "/home/sark/apps/wedding_budget_backend"
+                  cd "/home/sark/apps/wedding_budget_backend"
                   ./deploy.sh"
                 
 
