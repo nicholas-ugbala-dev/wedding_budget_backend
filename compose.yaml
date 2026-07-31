@@ -1,6 +1,6 @@
 services:
   backend:
-    build: .
+    image: ghcr.io/nicholas-ugbala-dev/plannerhub-backend:${IMAGE_TAG}
     container_name: plannerhub-backend
     env_file:
       - .env
