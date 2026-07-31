@@ -46,3 +46,30 @@ jobs:
               run: |
                 docker push ghcr.io/${{ github.repository_owner }}/plannerhub-backend:staging
                 docker push ghcr.io/${{ github.repository_owner }}/plannerhub-backend:${{ github.sha }}
+    
+    deploy:
+        name: Deploy to Raspberry Pi
+        needs: build-and-publish
+        runs-on: ubuntu-latest
+
+        env:
+            IMAGE_TAG: ${{ github.sha }}
+
+        steps:
+            - name: Configure SSH
+              run: |
+                mkdir -p ~/.ssh
+                echo "${{ secrets.PI_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+                chmod 600 ~/.ssh/id_ed25519
+                ssh-keyscan -H ${{ secrets.PI_HOST }} >> ~/.ssh/known_hosts
+
+            - name: Deploy application
+              run: |
+                ssh \
+                  -o BatchMode=yes \
+                  -o StrictHostKeyChecking=yes \
+                  "${{ secrets.PI_USER }}@${{ secrets.PI_HOST }}" \
+                  "cd ~/apps/wedding_budget_backend && IMAGE_TAG=${IMAGE_TAG} ./deploy.sh"
+                
+
+
