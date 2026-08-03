@@ -6,7 +6,7 @@ FROM base AS builder
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm ci
 
 COPY . .
 
@@ -16,7 +16,7 @@ FROM base AS runner
 
 COPY package*.json ./
 
-RUN npm install --omit=dev
+RUN npm ci --omit=dev
 
 COPY --from=builder /app/migrations ./migrations
 COPY --from=builder /app/database.json ./
