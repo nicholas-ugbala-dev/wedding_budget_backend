@@ -7,6 +7,23 @@ HEALTHCHECK_URL="http://localhost/api/health"
 MAX_RETRIES=30
 RETRY_INTERVAL=2
 
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+}
+
+wait_for_health() {
+    for ((i = 1; i <= MAX_RETRIES; i++)); do
+        if curl -fs "$HEALTHCHECK_URL" >/dev/null; then
+            return 0
+        fi
+
+        log "Health check failed ($i/$MAX_RETRIES). Retrying in $RETRY_INTERVAL seconds..."
+        sleep "$RETRY_INTERVAL"
+    done
+
+    return 1;
+}
+
 update_image_tag() {
     local tag="$1"
 
@@ -17,9 +34,34 @@ update_image_tag() {
     fi
 }
 
-log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+rollback() {
+    if [ -z "$PREVIOUS_TAG" ]; then
+    log "No previous Image available for rollback"
+    exit 1
+    fi
+
+    log "Rolling back previous tag: $PREVIOUS_TAG"
+
+    if ! update_image_tag "$PREVIOUS_TAG"; then
+        log "Rollback failed while restoring the IMAGE_TAG in .env"
+        exit 1
+    fi
+
+    if ! docker compose up -d --no-deps backend; then
+        log "Rollback failed while recreating the previous container"
+        exit 1
+    fi
+
+    if wait_for_health; then
+        log "Rollback succeeded. Application restored to previous version."
+        log "Deployment failed, but service recovered."
+        exit 1
+    fi
+
+    log "Deployment and Rollback failed. Application is currently down"
+    exit 1
 }
+
 
 echo "=========================================="
 log "PlannerHub Deployment Started"
@@ -41,7 +83,7 @@ CURRENT_CONTAINER_ID="$(
 
 PREVIOUS_IMAGE=""
 
-if [-n "$CURRENT_CONTAINER_ID"]; then
+if [ -n "$CURRENT_CONTAINER_ID" ]; then
     PREVIOUS_IMAGE="$(
         docker inspect \
         --format '{{.Config.Image}}' \
@@ -51,26 +93,39 @@ fi
 
 log "Previous image: ${PREVIOUS_IMAGE:-none}"
 
+PREVIOUS_TAG=""
+
+if [ -n "$PREVIOUS_IMAGE" ]; then
+    PREVIOUS_TAG="${PREVIOUS_IMAGE##*:}"
+fi
+
+log "Previous tag: ${PREVIOUS_TAG:-none}"
+
+log "Updating deployment state with target tag: ${IMAGE_TAG}"
+if ! update_image_tag "$IMAGE_TAG"; then
+    log "Failed to update latest deployment tag in .env"
+    exit 1
+fi
 
 log "Pulling the backend image..."
-docker compose pull backend
+if ! docker compose pull backend; then
+    log "Failed to pull target Image"
+    rollback
+fi
 
 log "Restarting the backend service..."
-docker compose up -d backend
+if ! docker compose up -d --no-deps backend; then
+    log "Failed to create new container service"
+    rollback
+fi
 
 log "Waiting for the backend service to become healthy..."
 
-for ((i = 1; i <= MAX_RETRIES; i++)); do
-    if curl -fs "$HEALTHCHECK_URL"  >/dev/null; then
-        log "Application is healthy"
-        log "Deployment completed successfully"
-        exit 0
-    fi
+if wait_for_health; then
+    log "Application is healthy"
+    log "Deployment completed successfully"
+    exit 0
+fi
 
-    log "Health check failed ($i/$MAX_RETRIES). Retrying in $RETRY_INTERVAL seconds..."
-    sleep "$RETRY_INTERVAL"
-done
-
-log "Error: Application failed health check after $((MAX_RETRIES * RETRY_INTERVAL)) seconds."
-
-exit 1
+log "New Deployment failed health check"
+rollback
