@@ -59,6 +59,13 @@ jobs:
             IMAGE_TAG: ${{ github.sha }}
 
         steps:
+            - name: Sync staging repository
+              run: |
+                cd /home/sark/apps/wedding_budget_backend
+                git fetch origin
+                git checkout staging
+                git reset --hard origin/staging
+
             - name: Deploy application
               run:  /home/sark/apps/wedding_budget_backend/deploy.sh
 
