@@ -3,9 +3,19 @@
 set -euo pipefail
 
 APP_DIR="/home/sark/apps/wedding_budget_backend"
-HEALTHCHECK_URL="http://localhost:8000/api/health"
+HEALTHCHECK_URL="http://localhost/api/health"
 MAX_RETRIES=30
 RETRY_INTERVAL=2
+
+update_image_tag() {
+    local tag="$1"
+
+    if grep -q '^IMAGE_TAG=' .env; then
+        sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=$tag|" .env
+    else
+        printf '\nIMAGE_TAG=%s\n' "$tag" >> .env
+    fi
+}
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
@@ -24,6 +34,23 @@ cd "$APP_DIR" || {
     log "Application directory not found."
     exit 1
 }
+
+CURRENT_CONTAINER_ID="$(
+    docker compose ps -a -q backend 2>/dev/null || true
+)"
+
+PREVIOUS_IMAGE=""
+
+if [-n "$CURRENT_CONTAINER_ID"]; then
+    PREVIOUS_IMAGE="$(
+        docker inspect \
+        --format '{{.Config.Image}}' \
+        "$CURRENT_CONTAINER_ID"
+    )"
+fi
+
+log "Previous image: ${PREVIOUS_IMAGE:-none}"
+
 
 log "Pulling the backend image..."
 docker compose pull backend
