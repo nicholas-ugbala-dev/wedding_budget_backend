@@ -58,7 +58,7 @@ rollback() {
         fi
     fi
 
-    if ! IMAGE_TAG="$PREVIOUS_IMAGE" docker compose up -d --no-deps backend; then
+    if ! IMAGE_TAG="$PREVIOUS_TAG" docker compose up -d --no-deps backend; then
         log "Rollback failed while recreating the previous container"
         exit 1
     fi
