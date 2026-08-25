@@ -23,11 +23,11 @@ app.use(express.json());
 app.use(httpLogger);
 
 app.get('/api/health', async (_req, res) => {
-    res.status(500).json({
-        status: 'intentional error for testing',
-        timestamp: new Date().toISOString(),
-    });
-    // res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    // res.status(500).json({
+    //     status: 'intentional error for testing',
+    //     timestamp: new Date().toISOString(),
+    // });
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 app.use('/api/v1', v1Router);

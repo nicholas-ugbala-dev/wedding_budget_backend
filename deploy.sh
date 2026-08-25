@@ -47,7 +47,18 @@ rollback() {
         exit 1
     fi
 
-    if ! docker compose up -d --no-deps backend; then
+    if docker image inspect "$PREVIOUS_IMAGE" >/dev/null 2>&1; then
+        log "Previous Image already exists locally"
+    else
+        log "Previous image not found locally. Pulling previous image..."
+
+        if ! docker pull "$PREVIOUS_IMAGE"; then
+        log "Rollback failed: unable to pull previous image"
+        exit 1
+        fi
+    fi
+
+    if ! IMAGE_TAG="$PREVIOUS_IMAGE" docker compose up -d --no-deps backend; then
         log "Rollback failed while recreating the previous container"
         exit 1
     fi
